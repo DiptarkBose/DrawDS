@@ -19,7 +19,7 @@ class CalenderCore
 	static DateTimeFormatter dateFormatDayView, dateFormatMonthView;
 	static LocalDateTime currentDate, eventDate;
 	static JFrame parentFrame;
-	static JPanel leftPanel, rightPanel, travelPanel, addAppointmentPanel, startTimePanel, endTimePanel;
+	static JPanel leftPanel, rightPanel, travelPanel, addAppointmentPanel, startTimePanel, endTimePanel, appointmentTypePanel;
 	static JMenuBar menuBar;
 	static JMenu fileMenu, viewMenu;
 	static JMenuItem exit;
@@ -28,6 +28,7 @@ class CalenderCore
 	static JButton today, prev, next, addAppointment;
 	static JTextField appointmentName;
 	static JSpinner startTimeHH, startTimeMM, endTimeHH, endTimeMM;
+	static JCheckBox vacationEvent, workEvent, meetingEvent, familyEvent, schoolEvent; 
 	static boolean isDayView;
 	
 	public CalenderCore()
@@ -46,11 +47,13 @@ class CalenderCore
 		today = new JButton("Today"); prev = new JButton("<"); next = new JButton(">"); addAppointment = new JButton("Add Appointment");
 		appointmentName = new JTextField(50); 
 		leftPanel = new JPanel(); rightPanel = new JPanel(); travelPanel = new JPanel(); addAppointmentPanel = new JPanel();
-		startTimePanel = new JPanel(); endTimePanel = new JPanel();
+		startTimePanel = new JPanel(); endTimePanel = new JPanel(); appointmentTypePanel = new JPanel();
 		startTimeHH = new JSpinner(new SpinnerNumberModel(00, 00, 23, 1));
 		startTimeMM = new JSpinner(new SpinnerNumberModel(00, 00, 59, 1));
 		endTimeHH = new JSpinner(new SpinnerNumberModel(00, 00, 23, 1));
 		endTimeMM = new JSpinner(new SpinnerNumberModel(00, 00, 59, 1));
+		vacationEvent = new JCheckBox("Vacation"); workEvent = new JCheckBox("Work"); meetingEvent = new JCheckBox("Meeting");
+		familyEvent = new JCheckBox("Family"); schoolEvent = new JCheckBox("School");
 	}
 	public static void createAndShowGUI()
 	{
@@ -145,11 +148,13 @@ class CalenderCore
 		JDatePanelImpl datePanel = new JDatePanelImpl(model, p);
 	    JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
 	    addAppointmentPanel.setLayout(new BoxLayout(addAppointmentPanel, BoxLayout.PAGE_AXIS));
-		startTimePanel.setLayout(new FlowLayout()); endTimePanel.setLayout(new FlowLayout());
+		startTimePanel.setLayout(new FlowLayout()); endTimePanel.setLayout(new FlowLayout()); appointmentTypePanel.setLayout(new FlowLayout());
 		startTimePanel.add(startTimeHH); startTimePanel.add(startTimeMM); 
 		endTimePanel.add(endTimeHH); endTimePanel.add(endTimeMM); 
+		appointmentTypePanel.add(vacationEvent); appointmentTypePanel.add(workEvent); appointmentTypePanel.add(meetingEvent); 
+		appointmentTypePanel.add(familyEvent); appointmentTypePanel.add(schoolEvent);
 		addAppointmentPanel.add(appointmentName); addAppointmentPanel.add(datePicker); 
-		addAppointmentPanel.add(startTimePanel); addAppointmentPanel.add(endTimePanel);
+		addAppointmentPanel.add(startTimePanel); addAppointmentPanel.add(endTimePanel); addAppointmentPanel.add(appointmentTypePanel);
 		addAppointment.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				statusLabel.setText("Add Appointment Clicked");
@@ -160,7 +165,14 @@ class CalenderCore
 				    DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
 				    String startTime = startTimeHH.getValue() + ":" + startTimeMM.getValue();
 				    String endTime = endTimeHH.getValue() + ":" + endTimeMM.getValue();
-				    String appointmentReport = "Scheduled " + appointmentName.getText() + " on " + df.format(selectedDate) + " from " + startTime + " to "+ endTime+".";
+				    String selectedTags = (vacationEvent.isSelected()? "| Vacation |" : "");
+				    selectedTags += (workEvent.isSelected()? "| Work |" : "");
+				    selectedTags += (meetingEvent.isSelected()? "| Meeting |" : "");
+				    selectedTags += (familyEvent.isSelected()? "| Family |" : "");
+				    selectedTags += (schoolEvent.isSelected()? "| School |" : "");
+				    String appointmentReport = "Scheduled " + appointmentName.getText() + " on " + df.format(selectedDate) + " from " + startTime + " to "+ endTime+".\n";
+				    if(selectedTags.length()>0)
+				    	appointmentReport += "Selected Tags for this event: "+ selectedTags + ".";
 				    statusLabel.setText(appointmentReport);
 				}
 				else
