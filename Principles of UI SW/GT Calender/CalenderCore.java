@@ -19,7 +19,7 @@ class CalenderCore
 	static DateTimeFormatter dateFormatDayView, dateFormatMonthView;
 	static LocalDateTime currentDate, eventDate;
 	static JFrame parentFrame;
-	static JPanel leftPanel, rightPanel, travelPanel, addAppointmentPanel, startTimePanel, endTimePanel, appointmentTypePanel, todayPanel, addAppointmentButtonPanel;
+	static JPanel leftPanel, rightPanel, travelPanel, addAppointmentPanel, startTimePanel, endTimePanel, appointmentTypePanel, todayPanel, addAppointmentButtonPanel, statusPanel;
 	static JMenuBar menuBar;
 	static JMenu fileMenu, viewMenu;
 	static JMenuItem exit;
@@ -35,8 +35,10 @@ class CalenderCore
 	
 	public CalenderCore()
 	{
-		// Label variables
+		// Label-related variables
 		statusLabel = new JLabel("Welcome");
+		statusLabel.setOpaque(true);
+		statusLabel.setBackground(Color.WHITE);
 		dialogBoxNameLabel = new JLabel("Appointment Name");
 		dialogBoxDateLabel = new JLabel("Date");
 		dialogBoxStartTimeLabel = new JLabel("Start Time (in HH:MM)");
@@ -51,8 +53,14 @@ class CalenderCore
 		// Frames and panels variables (Necessary for maintaining hierarchical control)
 		parentFrame = new JFrame("GT Calender");
 		leftPanel = new JPanel(); rightPanel = new JPanel(); travelPanel = new JPanel(); addAppointmentPanel = new JPanel();
+		travelPanel.setOpaque(true);
+		travelPanel.setBackground(Color.DARK_GRAY);
 		startTimePanel = new JPanel(); endTimePanel = new JPanel(); appointmentTypePanel = new JPanel();
-		todayPanel = new JPanel(); addAppointmentButtonPanel = new JPanel();
+		todayPanel = new JPanel(); addAppointmentButtonPanel = new JPanel(); statusPanel = new JPanel();
+		todayPanel.setOpaque(true);
+		todayPanel.setBackground(Color.DARK_GRAY);
+		addAppointmentButtonPanel.setOpaque(true);
+		addAppointmentButtonPanel.setBackground(Color.DARK_GRAY);
 
 		// Menu and menu items variables
 		menuBar = new JMenuBar();
@@ -67,7 +75,7 @@ class CalenderCore
 		contentAreaLabel = new JLabel(dayViewTimeDisplay + dateFormatDayView.format(currentDate));
 
 		// Control area (left panel) variables
-		today = new JButton("Today"); prev = new JButton("<"); next = new JButton(">"); 
+		today = new JButton("Today"); prev = new JButton("< Prev"); next = new JButton("Next >"); 
 		addAppointment = new JButton("Add Appointment");
 		
 		// Add appointment dialog box variables
@@ -178,6 +186,7 @@ class CalenderCore
 			}
 		});
 		leftPanel.add(todayPanel); leftPanel.add(travelPanel); leftPanel.add(addAppointmentButtonPanel);
+		
 		// Implementing a "sophisticated date and time picker" using JDatePicker (https://jdatepicker.org/about/) and the JSpinner Class.
 		UtilDateModel model = new UtilDateModel();
 		model.setSelected(true);
@@ -189,14 +198,16 @@ class CalenderCore
 	    JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
 	    addAppointmentPanel.setLayout(new BoxLayout(addAppointmentPanel, BoxLayout.PAGE_AXIS));
 		startTimePanel.setLayout(new FlowLayout()); endTimePanel.setLayout(new FlowLayout()); appointmentTypePanel.setLayout(new FlowLayout());
-		
 		startTimePanel.add(dialogBoxStartTimeLabel); startTimePanel.add(startTimeHH); startTimePanel.add(new JLabel(":")); startTimePanel.add(startTimeMM); 
-		
 		endTimePanel.add(dialogBoxEndTimeLabel); endTimePanel.add(endTimeHH); endTimePanel.add(new JLabel(":")); endTimePanel.add(endTimeMM); 
 		appointmentTypePanel.add(vacationEvent); appointmentTypePanel.add(workEvent); appointmentTypePanel.add(meetingEvent); 
 		appointmentTypePanel.add(familyEvent); appointmentTypePanel.add(schoolEvent);
+		
+		// Setting up appointment panel
 		addAppointmentPanel.add(appointmentName); addAppointmentPanel.add(datePicker); 
 		addAppointmentPanel.add(startTimePanel); addAppointmentPanel.add(endTimePanel); addAppointmentPanel.add(appointmentTypePanel);
+
+		// All functionalities within the dialog box is mentioned here
 		addAppointment.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				statusLabel.setText("Add Appointment Clicked");
@@ -222,35 +233,45 @@ class CalenderCore
 			}
 		});
 		/* 
+			---------------------------
 			END of Left Panel Configs.
+			---------------------------
 		*/
+
+
+
+		/*
+			Status Panel Config
+		*/
+		statusPanel.setLayout(new FlowLayout());
+		statusPanel.add(statusLabel);
 
 
 
 		/* 
 			Right Panel Configs.
 		*/
-		rightPanel.setLayout(new BorderLayout());
-		rightPanel.add(contentAreaLabel, BorderLayout.CENTER);
+		rightPanel.setLayout(new FlowLayout());
+		rightPanel.add(contentAreaLabel);
 
 		
 
 		/* 
-			START of Final placement of components onto out frame.
+			START of Final placement of components onto parent frame.
 		*/
 		parentFrame.setJMenuBar(menuBar);
 		parentFrame.setLayout(new BorderLayout());
 		parentFrame.add(leftPanel, BorderLayout.WEST);
 		parentFrame.add(statusLabel, BorderLayout.SOUTH);
-		parentFrame.add(rightPanel, BorderLayout.EAST);
+		parentFrame.add(rightPanel, BorderLayout.CENTER);
 		/* 
-			END of Final placement of components onto out frame.
+			END of Final placement of components onto parent frame.
 		*/
 
 
 
 		// Telling our calender app to assume required shape for accomodating all components, and then instructing it to display.
-		parentFrame.pack();
+		parentFrame.setSize(900,600);
 		parentFrame.setVisible(true);
 	}
 	public static void main(String[] args)
