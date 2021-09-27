@@ -15,11 +15,14 @@ import javax.swing.JFormattedTextField.AbstractFormatter;
 import java.text.ParseException;
 import java.util.*;
 import java.util.List;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 
 class EventDetails
 {
 	String eventName;
-	int startTimeHH, startTimeMM, endTimeHH, endTimeMM;
+	int startTimeHH, startTimeMM, endTimeHH, endTimeMM, y1, y2;
 	public EventDetails(String n, int sh, int sm, int eh, int em)
 	{
 		eventName = n;
@@ -31,9 +34,10 @@ class DayView extends JComponent
 {
 	static DateTimeFormatter dateFormatDayView, dateFormatMonthView;
 	static LocalDateTime currentDate;
+	static Date curDate;
 	static boolean isDayView;
 	static Map<String, List<EventDetails>> scheduleMap;
-	static Map<Integer, Integer> hourPositionMap;
+	static Map<Integer, Integer> hourPositionMap, positionHourMap;
 	static DateFormat df;
 
 	public DayView()
@@ -45,10 +49,15 @@ class DayView extends JComponent
 		currentDate = LocalDateTime.now(); 
 		isDayView = true;
 		scheduleMap = new HashMap<>();
-		hourPositionMap = new HashMap<>();
+		hourPositionMap = new HashMap<>(); positionHourMap = new HashMap<>();
 		int y = 100, i;
     	for(i=0; i<=23; i++, y+=50)
-    		hourPositionMap.put(i, y);	
+    	{
+    		hourPositionMap.put(i, y);
+    		positionHourMap.put(y, i);
+    	}
+    	curDate = new Date();
+    	curDate.setHours(0);
 	}
 
 	@Override
@@ -66,13 +75,13 @@ class DayView extends JComponent
     		graphics.drawString(i+":00", 30, y);
     		g2d.drawLine(70, y, this.getWidth()-50, y);
     	}
-    	Date today = new Date();
-    	today.setHours(0);
-    	List<EventDetails> eventList = scheduleMap.getOrDefault(df.format(today).toString(), new ArrayList<>());
+    	
+    	List<EventDetails> eventList = scheduleMap.getOrDefault(df.format(curDate).toString(), new ArrayList<>());
     	for(EventDetails evt : eventList)
     	{
     		int y1=hourPositionMap.get(evt.startTimeHH);
     		int y2=hourPositionMap.get(evt.endTimeHH);
+    		evt.y1=y1; evt.y2=y2;
     		addEvent(evt.eventName, y1, y2, graphics);
     	}
   	}
@@ -83,6 +92,17 @@ class DayView extends JComponent
     	graphics.setColor(Color.WHITE);
     	graphics.drawString(eventName, 95, (y1+y2)/2);
   	}
+}
+
+class DateUtil
+{
+    public static Date addDays(Date date, int days)
+    {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.DATE, days); //minus number would decrement the days
+        return cal.getTime();
+    }
 }
 
 class CalenderCore
@@ -105,7 +125,12 @@ class CalenderCore
 	static String dayViewTimeDisplay, monthViewTimeDisplay;
 	static DayView dv;
 	static Map<String, List<EventDetails>> scheduleMap;
-	
+	static DateFormat df;
+	static UtilDateModel model;
+	static Properties p;
+	static JDatePanelImpl datePanel;
+	static JDatePickerImpl datePicker;
+
 	public CalenderCore()
 	{
 		// Label-related variables
@@ -120,6 +145,7 @@ class CalenderCore
 		// Date-related variables
 		dateFormatDayView = DateTimeFormatter.ofPattern("MM/dd/yyyy"); 
 		dateFormatMonthView = DateTimeFormatter.ofPattern("MM/yyyy");
+		df = new SimpleDateFormat("MM/dd/yyyy");
 		dayViewTimeDisplay = "Day View: "; monthViewTimeDisplay = "Month Vew: "; 
 		currentDate = LocalDateTime.now(); 
 
@@ -144,10 +170,6 @@ class CalenderCore
 		monthView = new JRadioButtonMenuItem("Month");
 		viewGroup = new ButtonGroup();
 
-		// Content area variable
-		contentAreaLabel = new JLabel(dayViewTimeDisplay + dateFormatDayView.format(currentDate));
-		dv = new DayView();
-
 		// Control area (left panel) variables
 		today = new JButton("Today"); prev = new JButton("< Prev"); next = new JButton("Next >"); 
 		addAppointment = new JButton("Add Appointment");
@@ -160,6 +182,149 @@ class CalenderCore
 		endTimeMM = new JSpinner(new SpinnerNumberModel(00, 00, 59, 1));
 		vacationEvent = new JCheckBox("Vacation"); workEvent = new JCheckBox("Work"); meetingEvent = new JCheckBox("Meeting");
 		familyEvent = new JCheckBox("Family"); schoolEvent = new JCheckBox("School");
+
+		// Content area variable
+		contentAreaLabel = new JLabel(dayViewTimeDisplay + dateFormatDayView.format(currentDate));
+		dv = new DayView();
+		model = new UtilDateModel();
+		model.setSelected(true);
+		p = new Properties();
+		p.put("text.today", "Today");
+		p.put("text.month", "Month");
+		p.put("text.year", "Year");
+		datePanel = new JDatePanelImpl(model, p);
+	    datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
+	    addAppointmentPanel.setLayout(new BoxLayout(addAppointmentPanel, BoxLayout.PAGE_AXIS));
+		startTimePanel.setLayout(new FlowLayout()); endTimePanel.setLayout(new FlowLayout()); appointmentTypePanel.setLayout(new FlowLayout());
+		startTimePanel.add(dialogBoxStartTimeLabel); startTimePanel.add(startTimeHH); startTimePanel.add(new JLabel(":")); startTimePanel.add(startTimeMM); 
+		endTimePanel.add(dialogBoxEndTimeLabel); endTimePanel.add(endTimeHH); endTimePanel.add(new JLabel(":")); endTimePanel.add(endTimeMM); 
+		appointmentTypePanel.add(vacationEvent); appointmentTypePanel.add(workEvent); appointmentTypePanel.add(meetingEvent); 
+		appointmentTypePanel.add(familyEvent); appointmentTypePanel.add(schoolEvent);
+		
+		// Setting up appointment panel
+		addAppointmentPanel.add(appointmentName); addAppointmentPanel.add(datePicker); 
+		addAppointmentPanel.add(startTimePanel); addAppointmentPanel.add(endTimePanel); addAppointmentPanel.add(appointmentTypePanel);
+		dv.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                List<EventDetails> eventList = scheduleMap.getOrDefault(df.format(dv.curDate).toString(), new ArrayList<>());
+                int x = e.getX(); int y = e.getY();
+                EventDetails selectedEvent = null;
+                for(EventDetails evt : eventList)
+                {
+                	if(x>=70 && x<=270 && y>=evt.y1 && y<=evt.y2)
+                	{
+                		selectedEvent = evt;
+                		break;
+                	}
+                }
+                if(selectedEvent!=null)
+                {
+                	if(e.getClickCount()==2)
+                	{
+                		appointmentName.setText(selectedEvent.eventName);
+						startTimeHH.setValue(selectedEvent.startTimeHH); startTimeMM.setValue(selectedEvent.startTimeMM);
+						endTimeHH.setValue(selectedEvent.endTimeHH); endTimeMM.setValue(selectedEvent.endTimeMM);
+						vacationEvent.setSelected(false);
+						workEvent.setSelected(false);
+						meetingEvent.setSelected(false);
+						familyEvent.setSelected(false);
+						schoolEvent.setSelected(false);
+
+						int result = JOptionPane.showConfirmDialog(null, addAppointmentPanel, "Edit Appointment", JOptionPane.OK_CANCEL_OPTION);
+						if (result == JOptionPane.OK_OPTION) {
+							Date selectedDate = (Date) datePicker.getModel().getValue();
+						    DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+						    String startTime = startTimeHH.getValue() + ":" + startTimeMM.getValue();
+						    String endTime = endTimeHH.getValue() + ":" + endTimeMM.getValue();
+						    String selectedTags = (vacationEvent.isSelected()? "| Vacation |" : "");
+						    selectedTags += (workEvent.isSelected()? "| Work |" : "");
+						    selectedTags += (meetingEvent.isSelected()? "| Meeting |" : "");
+						    selectedTags += (familyEvent.isSelected()? "| Family |" : "");
+						    selectedTags += (schoolEvent.isSelected()? "| School |" : "");
+						    String appointmentReport = "Re-scheduled " + appointmentName.getText() + " on " + df.format(selectedDate) + " from " + startTime + " to "+ endTime+". \n";
+						    if(selectedTags.length()>0)
+						    	appointmentReport += "Selected Tags for this appointment: "+ selectedTags + ".";
+						    statusLabel.setText(appointmentReport);
+
+						    // Create new event
+						    String name = appointmentName.getText().toString();
+						    Integer sh = (Integer)startTimeHH.getValue();
+						    Integer sm = (Integer)startTimeMM.getValue();
+						    Integer eh = (Integer)endTimeHH.getValue();
+						    Integer em = (Integer)endTimeMM.getValue();
+						    selectedEvent.eventName = name; selectedEvent.startTimeHH = sh; selectedEvent.startTimeMM = sm; selectedEvent.endTimeHH = eh; selectedEvent.endTimeMM = em;
+						    eventList.remove(selectedEvent);
+						    List<EventDetails> newEventList = scheduleMap.getOrDefault(df.format(selectedDate).toString(), new ArrayList<EventDetails>());
+						    newEventList.add(selectedEvent);
+						    scheduleMap.put(df.format(selectedDate).toString(), newEventList);
+						    dv.scheduleMap = scheduleMap;
+						    dv.repaint();
+						}
+						else
+							statusLabel.setText("Cancelled edit of new appointment!");
+                	}
+                }
+                else
+                {
+                	if(e.getClickCount()==2)
+                	{
+                		int y1 = e.getY();
+                		if(y1>=100)
+                		{
+	                		appointmentName.setText("New Appointment");
+	                		while(y1>=100)
+	                		{
+	                			if(dv.positionHourMap.containsKey(y1)) break;
+	                			y1--;
+	                		}
+							startTimeHH.setValue(dv.positionHourMap.get(y1)); startTimeMM.setValue(0);
+							endTimeHH.setValue(dv.positionHourMap.get(y1+50)); endTimeMM.setValue(0);
+							vacationEvent.setSelected(false);
+							workEvent.setSelected(false);
+							meetingEvent.setSelected(false);
+							familyEvent.setSelected(false);
+							schoolEvent.setSelected(false);
+
+							int result = JOptionPane.showConfirmDialog(null, addAppointmentPanel, "Edit Appointment", JOptionPane.OK_CANCEL_OPTION);
+							if (result == JOptionPane.OK_OPTION) {
+								Date selectedDate = (Date) datePicker.getModel().getValue();
+							    DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+							    String startTime = startTimeHH.getValue() + ":" + startTimeMM.getValue();
+							    String endTime = endTimeHH.getValue() + ":" + endTimeMM.getValue();
+							    String selectedTags = (vacationEvent.isSelected()? "| Vacation |" : "");
+							    selectedTags += (workEvent.isSelected()? "| Work |" : "");
+							    selectedTags += (meetingEvent.isSelected()? "| Meeting |" : "");
+							    selectedTags += (familyEvent.isSelected()? "| Family |" : "");
+							    selectedTags += (schoolEvent.isSelected()? "| School |" : "");
+							    String appointmentReport = "Re-scheduled " + appointmentName.getText() + " on " + df.format(selectedDate) + " from " + startTime + " to "+ endTime+". \n";
+							    if(selectedTags.length()>0)
+							    	appointmentReport += "Selected Tags for this appointment: "+ selectedTags + ".";
+							    statusLabel.setText(appointmentReport);
+
+							    // Create new event
+							    String name = appointmentName.getText().toString();
+							    Integer sh = (Integer)startTimeHH.getValue();
+							    Integer sm = (Integer)startTimeMM.getValue();
+							    Integer eh = (Integer)endTimeHH.getValue();
+							    Integer em = (Integer)endTimeMM.getValue();
+							    EventDetails evt = new EventDetails(name, sh, sm, eh, em);
+							    List<EventDetails> newEventList = scheduleMap.getOrDefault(df.format(selectedDate).toString(), new ArrayList<EventDetails>());
+							    newEventList.add(evt);
+							    scheduleMap.put(df.format(selectedDate).toString(), newEventList);
+							    dv.scheduleMap = scheduleMap;
+							    dv.repaint();
+							}
+							else
+								statusLabel.setText("Cancelled addition of new appointment!");
+						}
+                	}
+                }
+            }
+        });
+
+		
 	}
 	public static void createAndShowGUI()
 	{
@@ -231,6 +396,12 @@ class CalenderCore
 					currentDate = currentDate.minusMonths(1);
 					contentAreaLabel.setText(monthViewTimeDisplay + dateFormatMonthView.format(currentDate));
 				}
+				dv.currentDate = currentDate;
+				Calendar cal = Calendar.getInstance(); 
+				cal.setTime(dv.curDate); 
+				cal.add(Calendar.DATE, -1);
+				dv.curDate = cal.getTime();
+				dv.repaint();
 			}
 		});
 		next.addActionListener(new ActionListener(){
@@ -247,6 +418,12 @@ class CalenderCore
 					currentDate = currentDate.plusMonths(1);
 					contentAreaLabel.setText(monthViewTimeDisplay + dateFormatMonthView.format(currentDate));
 				}
+				dv.currentDate = currentDate;
+				Calendar cal = Calendar.getInstance(); 
+				cal.setTime(dv.curDate); 
+				cal.add(Calendar.DATE, 1);
+				dv.curDate = cal.getTime();
+				dv.repaint();
 			}
 		});
 		today.addActionListener(new ActionListener(){
@@ -257,30 +434,17 @@ class CalenderCore
 					contentAreaLabel.setText(dayViewTimeDisplay + dateFormatDayView.format(currentDate));
 				else
 					contentAreaLabel.setText(monthViewTimeDisplay + dateFormatMonthView.format(currentDate));
+				dv.currentDate = currentDate;
+				Date d = new Date();
+    			d.setHours(0);
+				dv.curDate = d;
+				dv.repaint();
 			}
 		});
 		leftPanel.add(todayPanel); leftPanel.add(travelPanel); leftPanel.add(addAppointmentButtonPanel);
 		
 		// Implementing a "sophisticated date and time picker" using JDatePicker (https://jdatepicker.org/about/) and the JSpinner Class.
-		UtilDateModel model = new UtilDateModel();
-		model.setSelected(true);
-		Properties p = new Properties();
-		p.put("text.today", "Today");
-		p.put("text.month", "Month");
-		p.put("text.year", "Year");
-		JDatePanelImpl datePanel = new JDatePanelImpl(model, p);
-	    JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
-	    addAppointmentPanel.setLayout(new BoxLayout(addAppointmentPanel, BoxLayout.PAGE_AXIS));
-		startTimePanel.setLayout(new FlowLayout()); endTimePanel.setLayout(new FlowLayout()); appointmentTypePanel.setLayout(new FlowLayout());
-		startTimePanel.add(dialogBoxStartTimeLabel); startTimePanel.add(startTimeHH); startTimePanel.add(new JLabel(":")); startTimePanel.add(startTimeMM); 
-		endTimePanel.add(dialogBoxEndTimeLabel); endTimePanel.add(endTimeHH); endTimePanel.add(new JLabel(":")); endTimePanel.add(endTimeMM); 
-		appointmentTypePanel.add(vacationEvent); appointmentTypePanel.add(workEvent); appointmentTypePanel.add(meetingEvent); 
-		appointmentTypePanel.add(familyEvent); appointmentTypePanel.add(schoolEvent);
 		
-		// Setting up appointment panel
-		addAppointmentPanel.add(appointmentName); addAppointmentPanel.add(datePicker); 
-		addAppointmentPanel.add(startTimePanel); addAppointmentPanel.add(endTimePanel); addAppointmentPanel.add(appointmentTypePanel);
-
 		// All functionalities within the dialog box is mentioned here
 		addAppointment.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
