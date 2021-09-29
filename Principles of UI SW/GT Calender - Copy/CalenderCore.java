@@ -130,9 +130,15 @@ class CalenderCore
 	static Properties p;
 	static JDatePanelImpl datePanel;
 	static JDatePickerImpl datePicker;
+	static boolean dragging, eventClicked;
+	EventDetails selectedEvent;
 
 	public CalenderCore()
 	{
+		dragging = false;
+		eventClicked = false;
+		selectedEvent = null;
+
 		// Label-related variables
 		statusLabel = new JLabel("Welcome");
 		statusLabel.setOpaque(true);
@@ -210,7 +216,7 @@ class CalenderCore
                 super.mouseClicked(e);
                 List<EventDetails> eventList = scheduleMap.getOrDefault(df.format(dv.curDate).toString(), new ArrayList<>());
                 int x = e.getX(); int y = e.getY();
-                EventDetails selectedEvent = null;
+                selectedEvent = null;
                 for(EventDetails evt : eventList)
                 {
                 	if(x>=70 && x<=270 && y>=evt.y1 && y<=evt.y2)
@@ -221,6 +227,7 @@ class CalenderCore
                 }
                 if(selectedEvent!=null)
                 {
+                	eventClicked = true;
                 	if(e.getClickCount()==2)
                 	{
                 		appointmentName.setText(selectedEvent.eventName);
@@ -268,6 +275,7 @@ class CalenderCore
                 }
                 else
                 {
+                	eventClicked = false;
                 	if(e.getClickCount()==2)
                 	{
                 		int y1 = e.getY();
@@ -322,9 +330,77 @@ class CalenderCore
                 	}
                 }
             }
+            @Override
+		    public void mouseReleased(MouseEvent event) {
+		    	dragging = false;
+		    	if(eventClicked)
+		    	{
+		    		int newY = event.getY(); int closestY1;
+		    		if(newY<100) closestY1 = 100;
+		    		else
+		    		{
+		    			closestY1 = newY;
+		    			while(closestY1>=100)
+		    			{
+		    				if(dv.positionHourMap.containsKey(closestY1)) break;
+		    				closestY1--;
+		    			}
+		    		}
+		    		int height = selectedEvent.y2-selectedEvent.y1;
+		    		selectedEvent.y1 = closestY1;
+		    		selectedEvent.y2 = closestY1+height;
+		    		selectedEvent.startTimeHH = dv.positionHourMap.get(selectedEvent.y1);
+		    		selectedEvent.endTimeHH = dv.positionHourMap.get(selectedEvent.y2);
+		    		dv.scheduleMap = scheduleMap;
+		    		statusLabel.setText("Rescheduled "+selectedEvent.eventName+": "+selectedEvent.startTimeHH+":00 to "+ selectedEvent.endTimeHH+":00.");
+		    		dv.repaint();
+		    	}
+		    }
+		    @Override
+    		public void mousePressed(MouseEvent e) {
+    			dragging = true;
+    			selectedEvent = null;
+    			List<EventDetails> eventList = scheduleMap.getOrDefault(df.format(dv.curDate).toString(), new ArrayList<>());
+                int x = e.getX(); int y = e.getY();
+                for(EventDetails evt : eventList)
+                {
+                	if(x>=70 && x<=270 && y>=evt.y1 && y<=evt.y2)
+                	{
+                		selectedEvent = evt;
+                		break;
+                	}
+                }
+                if(selectedEvent!=null) eventClicked = true;
+                else eventClicked = false;
+    		}
+		    
         });
-
-		
+		dv.addMouseMotionListener(new MouseAdapter() {
+            @Override
+		    public void mouseDragged(MouseEvent event) {
+		    	if(eventClicked)
+		    	{
+		    		int newY = event.getY(); int closestY1;
+		    		if(newY<100) closestY1 = 100;
+		    		else
+		    		{
+		    			closestY1 = newY;
+		    			while(closestY1>=100)
+		    			{
+		    				if(dv.positionHourMap.containsKey(closestY1)) break;
+		    				closestY1--;
+		    			}
+		    		}
+		    		int height = selectedEvent.y2-selectedEvent.y1;
+		    		selectedEvent.y1 = closestY1;
+		    		selectedEvent.y2 = closestY1+height;
+		    		selectedEvent.startTimeHH = dv.positionHourMap.get(selectedEvent.y1);
+		    		selectedEvent.endTimeHH = dv.positionHourMap.get(selectedEvent.y2);
+		    		dv.scheduleMap = scheduleMap;
+		    		dv.repaint();
+		    	}
+		    }
+        });
 	}
 	public static void createAndShowGUI()
 	{
