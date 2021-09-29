@@ -39,6 +39,7 @@ class DayView extends JComponent
 	static Map<String, List<EventDetails>> scheduleMap;
 	static Map<Integer, Integer> hourPositionMap, positionHourMap;
 	static DateFormat df;
+	int tentativeY1, tentativeY2;
 
 	public DayView()
 	{
@@ -58,6 +59,7 @@ class DayView extends JComponent
     	}
     	curDate = new Date();
     	curDate.setHours(0);
+    	tentativeY1 = -1; tentativeY2 =-1;
 	}
 
 	@Override
@@ -83,6 +85,18 @@ class DayView extends JComponent
     		int y2=hourPositionMap.get(evt.endTimeHH);
     		evt.y1=y1; evt.y2=y2;
     		addEvent(evt.eventName, y1, y2, graphics);
+    	}
+    	if(tentativeY1!=-1 && tentativeY2!=-1)
+    	{
+    		int y1=tentativeY1;
+    		int y2=tentativeY2;
+    		Color lightBlue = new Color(75, 119, 190);
+    		graphics.setColor(lightBlue);
+    		if(y1<100) y1=100;
+    		if(y2>2200) y2=2200;
+	    	graphics.fillRoundRect(70, y1, 200, y2-y1, 10, 10);
+	    	graphics.setColor(Color.WHITE);
+	    	graphics.drawString("New Appointment", 95, (y1+y2)/2);
     	}
   	}
   	public void addEvent(String eventName, int y1, int y2, Graphics graphics)
@@ -132,6 +146,7 @@ class CalenderCore
 	static JDatePickerImpl datePicker;
 	static boolean dragging, eventClicked;
 	EventDetails selectedEvent;
+	int rubberBandX1, rubberBandY1, rubberBandX2, rubberBandY2;
 
 	public CalenderCore()
 	{
@@ -333,6 +348,7 @@ class CalenderCore
             @Override
 		    public void mouseReleased(MouseEvent event) {
 		    	dragging = false;
+		    	
 		    	if(eventClicked)
 		    	{
 		    		int newY = event.getY(); int closestY1;
@@ -355,6 +371,41 @@ class CalenderCore
 		    		statusLabel.setText("Rescheduled "+selectedEvent.eventName+": "+selectedEvent.startTimeHH+":00 to "+ selectedEvent.endTimeHH+":00.");
 		    		dv.repaint();
 		    	}
+		    	else
+		    	{
+		    		int newY1 = dv.tentativeY1; int newY2 = dv.tentativeY2;
+		    		if(newY1<100) newY1 = 100;
+		    		else
+		    		{
+		    			while(newY1>=100)
+		    			{
+		    				if(dv.positionHourMap.containsKey(newY1)) break;
+		    				newY1--;
+		    			}
+		    		}
+		    		if(newY2>2200) newY2 = 2200;
+		    		else
+		    		{
+		    			while(newY2<=2200)
+		    			{
+		    				if(dv.positionHourMap.containsKey(newY2)) break;
+		    				newY2++;
+		    			}
+		    		}
+		    		String name = "New Appointment";
+				    Integer sh = dv.positionHourMap.get(newY1);
+				    Integer sm = 0;
+				    Integer eh = dv.positionHourMap.get(newY2);
+				    Integer em = 0;
+		    		EventDetails draggedEvent = new EventDetails(name, sh, sm, eh, em);
+		    		List<EventDetails> newEventList = scheduleMap.getOrDefault(df.format(dv.curDate).toString(), new ArrayList<EventDetails>());
+					newEventList.add(draggedEvent);
+					scheduleMap.put(df.format(dv.curDate).toString(), newEventList);
+					dv.scheduleMap = scheduleMap;
+							    
+		    		dv.tentativeY1 = -1; dv.tentativeY2 = -1;
+		    		dv.repaint();
+		    	}
 		    }
 		    @Override
     		public void mousePressed(MouseEvent e) {
@@ -371,7 +422,11 @@ class CalenderCore
                 	}
                 }
                 if(selectedEvent!=null) eventClicked = true;
-                else eventClicked = false;
+                else 
+                {
+                	eventClicked = false;
+                	dv.tentativeY1 = e.getY();
+                }
     		}
 		    
         });
@@ -397,6 +452,11 @@ class CalenderCore
 		    		selectedEvent.startTimeHH = dv.positionHourMap.get(selectedEvent.y1);
 		    		selectedEvent.endTimeHH = dv.positionHourMap.get(selectedEvent.y2);
 		    		dv.scheduleMap = scheduleMap;
+		    		dv.repaint();
+		    	}
+		    	else
+		    	{
+		    		dv.tentativeY2 = event.getY();
 		    		dv.repaint();
 		    	}
 		    }
