@@ -23,6 +23,7 @@ class EventDetails
 {
 	String eventName;
 	int startTimeHH, startTimeMM, endTimeHH, endTimeMM, y1, y2;
+	boolean isWork, isVacation, isMeeting, isSchool, isFamily;
 	public EventDetails(String n, int sh, int sm, int eh, int em)
 	{
 		eventName = n;
@@ -84,7 +85,7 @@ class DayView extends JComponent
     		int y1=hourPositionMap.get(evt.startTimeHH);
     		int y2=hourPositionMap.get(evt.endTimeHH);
     		evt.y1=y1; evt.y2=y2;
-    		addEvent(evt.eventName, y1, y2, graphics);
+    		addEvent(evt.eventName, y1, y2, graphics, evt.startTimeHH, evt.startTimeMM, evt.endTimeHH, evt.endTimeMM, evt);
     	}
     	if(tentativeY1!=-1 && tentativeY2!=-1)
     	{
@@ -99,12 +100,22 @@ class DayView extends JComponent
 	    	graphics.drawString("New Appointment", 95, (y1+y2)/2);
     	}
   	}
-  	public void addEvent(String eventName, int y1, int y2, Graphics graphics)
+  	public void addEvent(String eventName, int y1, int y2, Graphics graphics, int sh, int sm, int eh, int em, EventDetails evt)
   	{
   		graphics.setColor(Color.BLUE);
     	graphics.fillRoundRect(70, y1, 200, y2-y1, 10, 10);
     	graphics.setColor(Color.WHITE);
-    	graphics.drawString(eventName, 95, (y1+y2)/2);
+    	graphics.drawString(eventName, 95, ((y1+y2)/2)-10);
+    	String timing = sh+":"+sm+" - "+eh+":"+em;
+    	graphics.drawString(timing, 95, ((y1+y2)/2)+5);
+    	String tags = "";
+    	if(evt.isSchool) tags+="| School |";
+    	if(evt.isWork) tags+="| Work |";
+    	if(evt.isMeeting) tags+="| Meeting |";
+    	if(evt.isVacation) tags+="| Vacation |";
+    	if(evt.isFamily) tags+="| Family |";
+    	if(tags.length()==0) tags = "No Tags";
+    	graphics.drawString(tags, 95, ((y1+y2)/2)+20);
   	}
 }
 
@@ -248,11 +259,11 @@ class CalenderCore
                 		appointmentName.setText(selectedEvent.eventName);
 						startTimeHH.setValue(selectedEvent.startTimeHH); startTimeMM.setValue(selectedEvent.startTimeMM);
 						endTimeHH.setValue(selectedEvent.endTimeHH); endTimeMM.setValue(selectedEvent.endTimeMM);
-						vacationEvent.setSelected(false);
-						workEvent.setSelected(false);
-						meetingEvent.setSelected(false);
-						familyEvent.setSelected(false);
-						schoolEvent.setSelected(false);
+						vacationEvent.setSelected(selectedEvent.isVacation);
+						workEvent.setSelected(selectedEvent.isWork);
+						meetingEvent.setSelected(selectedEvent.isMeeting);
+						familyEvent.setSelected(selectedEvent.isFamily);
+						schoolEvent.setSelected(selectedEvent.isSchool);
 
 						int result = JOptionPane.showConfirmDialog(null, addAppointmentPanel, "Edit Appointment", JOptionPane.OK_CANCEL_OPTION);
 						if (result == JOptionPane.OK_OPTION) {
@@ -277,6 +288,11 @@ class CalenderCore
 						    Integer eh = (Integer)endTimeHH.getValue();
 						    Integer em = (Integer)endTimeMM.getValue();
 						    selectedEvent.eventName = name; selectedEvent.startTimeHH = sh; selectedEvent.startTimeMM = sm; selectedEvent.endTimeHH = eh; selectedEvent.endTimeMM = em;
+						    selectedEvent.isVacation = (vacationEvent.isSelected()? true : false);
+						    selectedEvent.isWork = (workEvent.isSelected()? true : false);
+						    selectedEvent.isMeeting = (meetingEvent.isSelected()? true : false);
+						    selectedEvent.isFamily = (familyEvent.isSelected()? true : false);
+						    selectedEvent.isSchool = (schoolEvent.isSelected()? true : false);
 						    eventList.remove(selectedEvent);
 						    List<EventDetails> newEventList = scheduleMap.getOrDefault(df.format(selectedDate).toString(), new ArrayList<EventDetails>());
 						    newEventList.add(selectedEvent);
@@ -310,7 +326,7 @@ class CalenderCore
 							familyEvent.setSelected(false);
 							schoolEvent.setSelected(false);
 
-							int result = JOptionPane.showConfirmDialog(null, addAppointmentPanel, "Edit Appointment", JOptionPane.OK_CANCEL_OPTION);
+							int result = JOptionPane.showConfirmDialog(null, addAppointmentPanel, "New Appointment", JOptionPane.OK_CANCEL_OPTION);
 							if (result == JOptionPane.OK_OPTION) {
 								Date selectedDate = (Date) datePicker.getModel().getValue();
 							    DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
@@ -321,7 +337,7 @@ class CalenderCore
 							    selectedTags += (meetingEvent.isSelected()? "| Meeting |" : "");
 							    selectedTags += (familyEvent.isSelected()? "| Family |" : "");
 							    selectedTags += (schoolEvent.isSelected()? "| School |" : "");
-							    String appointmentReport = "Re-scheduled " + appointmentName.getText() + " on " + df.format(selectedDate) + " from " + startTime + " to "+ endTime+". \n";
+							    String appointmentReport = "Scheduled " + appointmentName.getText() + " on " + df.format(selectedDate) + " from " + startTime + " to "+ endTime+". \n";
 							    if(selectedTags.length()>0)
 							    	appointmentReport += "Selected Tags for this appointment: "+ selectedTags + ".";
 							    statusLabel.setText(appointmentReport);
@@ -333,6 +349,11 @@ class CalenderCore
 							    Integer eh = (Integer)endTimeHH.getValue();
 							    Integer em = (Integer)endTimeMM.getValue();
 							    EventDetails evt = new EventDetails(name, sh, sm, eh, em);
+							    evt.isVacation = (vacationEvent.isSelected()? true : false);
+							    evt.isWork = (workEvent.isSelected()? true : false);
+							    evt.isMeeting = (meetingEvent.isSelected()? true : false);
+							    evt.isFamily = (familyEvent.isSelected()? true : false);
+							    evt.isSchool = (schoolEvent.isSelected()? true : false);
 							    List<EventDetails> newEventList = scheduleMap.getOrDefault(df.format(selectedDate).toString(), new ArrayList<EventDetails>());
 							    newEventList.add(evt);
 							    scheduleMap.put(df.format(selectedDate).toString(), newEventList);
@@ -347,8 +368,7 @@ class CalenderCore
             }
             @Override
 		    public void mouseReleased(MouseEvent event) {
-		    	dragging = false;
-		    	
+
 		    	if(eventClicked)
 		    	{
 		    		int newY = event.getY(); int closestY1;
@@ -368,7 +388,8 @@ class CalenderCore
 		    		selectedEvent.startTimeHH = dv.positionHourMap.get(selectedEvent.y1);
 		    		selectedEvent.endTimeHH = dv.positionHourMap.get(selectedEvent.y2);
 		    		dv.scheduleMap = scheduleMap;
-		    		statusLabel.setText("Rescheduled "+selectedEvent.eventName+": "+selectedEvent.startTimeHH+":00 to "+ selectedEvent.endTimeHH+":00.");
+		    		statusLabel.setText("Rescheduled "+selectedEvent.eventName+": "+selectedEvent.startTimeHH+":"+ selectedEvent.startTimeMM+" to "+ selectedEvent.endTimeHH+":"+selectedEvent.endTimeMM);
+		    		dragging = false;
 		    		dv.repaint();
 		    	}
 		    	else
@@ -428,9 +449,9 @@ class CalenderCore
                 	dv.tentativeY1 = e.getY();
                 }
     		}
-		    
         });
 		dv.addMouseMotionListener(new MouseAdapter() {
+            
             @Override
 		    public void mouseDragged(MouseEvent event) {
 		    	if(eventClicked)
@@ -589,7 +610,7 @@ class CalenderCore
 				//Reset appointment values (Needed if user clicks Add Appointment multiple times)
 				appointmentName.setText("New Appointment");
 				startTimeHH.setValue(0); startTimeMM.setValue(0);
-				endTimeHH.setValue(0); endTimeMM.setValue(0);
+				endTimeHH.setValue(1); endTimeMM.setValue(0);
 				vacationEvent.setSelected(false);
 				workEvent.setSelected(false);
 				meetingEvent.setSelected(false);
@@ -619,6 +640,11 @@ class CalenderCore
 				    Integer eh = (Integer)endTimeHH.getValue();
 				    Integer em = (Integer)endTimeMM.getValue();
 				    EventDetails evt = new EventDetails(name, sh, sm, eh, em);
+				    evt.isVacation = (vacationEvent.isSelected()? true : false);
+				    evt.isWork = (workEvent.isSelected()? true : false);
+				    evt.isMeeting = (meetingEvent.isSelected()? true : false);
+				    evt.isFamily = (familyEvent.isSelected()? true : false);
+				    evt.isSchool = (schoolEvent.isSelected()? true : false);
 				    List<EventDetails> eventList = scheduleMap.getOrDefault(df.format(selectedDate).toString(), new ArrayList<EventDetails>());
 				    eventList.add(evt);
 				    scheduleMap.put(df.format(selectedDate).toString(), eventList);
@@ -648,10 +674,7 @@ class CalenderCore
 		/* 
 			Right Panel Configs.
 		*/
-		//dv.setSize(300, 300);
-		//rightPanel.setLayout(new FlowLayout());
-		//rightPanel.add(dv);
-		JScrollPane scroll = new JScrollPane(dv);
+		JScrollPane scroll = new JScrollPane(dv, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 
 		
 
