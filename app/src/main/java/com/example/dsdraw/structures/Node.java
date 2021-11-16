@@ -2,19 +2,18 @@ package com.example.dsdraw.structures;
 
 public class Node
 {
-//    int key;
     public char label;
     public Node left, right;
-
-//    public Node(int item)
-//    {
-//        key = item;
-//        left = right = null;
-//    }
+    private CanvasPoint point;
 
     public Node(char _label)
     {
         label = _label;
         left = right = null;
+    }
+
+    public CanvasPoint getPoint() { return point; }
+    public void setPoint(CanvasPoint pt) {
+        point = pt;
     }
 }
