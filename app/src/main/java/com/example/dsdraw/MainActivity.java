@@ -18,12 +18,12 @@ import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
-    DrawingCanvas canvas;
+    LLDraw canvas;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        canvas = new DrawingCanvas(this);
+        canvas = new LLDraw(this);
         setContentView(canvas);
         canvas.requestFocus();
         //canvas = (DrawingCanvas) findViewById(R.id.canvas);
