@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,6 +25,7 @@ public class ArrayDraw extends View implements View.OnTouchListener {
     private static int numNodes = 1;
 
     List<Point> points = new ArrayList<>();
+    List<Point> curStroke = new ArrayList<>();
     Context c;
     Paint paint = new Paint();
 
@@ -48,6 +50,10 @@ public class ArrayDraw extends View implements View.OnTouchListener {
             x1 += 100;
             x2 += 100;
         }
+        if(curStroke.size()>2) {
+            for(Point point : curStroke)
+                points.add(point);
+        }
         for (Point point : points) {
             canvas.drawCircle(point.x, point.y, 20, paint);
         }
@@ -55,64 +61,79 @@ public class ArrayDraw extends View implements View.OnTouchListener {
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        int numPointers = event.getPointerCount();
-        if (numPointers == 1) {
-            Point point = new Point();
-            point.x = event.getX();
-            point.y = event.getY();
-            points.add(point);
-            invalidate();
-        }
-        else {
-            switch (event.getAction() & MotionEvent.ACTION_MASK) {
-                case MotionEvent.ACTION_POINTER_DOWN:
-                    // This happens when you touch the screen with two fingers
-                    mode = SWIPE;
-                    startY = event.getY(0);
-                    startX = event.getX(0);
-                    break;
 
-                case MotionEvent.ACTION_POINTER_UP:
-                    // This happens when you release the second finger
-                    mode = NONE;
-                    if (Math.abs(startX - stopX) > THRESHOLD && Math.abs(startY - stopY) < THRESHOLD) {
-                        if (startX > stopX) {
-                            // Swipe left
-                            Toast toast = Toast.makeText(c, "Double Finger Left Swipe", Toast.LENGTH_SHORT);
-                            numNodes--;
-                            toast.show();
-                        } else {
-                            //Swipe right
-                            Toast toast = Toast.makeText(c, "Double Finger Right Swipe", Toast.LENGTH_SHORT);
-                            numNodes++;
-                            toast.show();
-                        }
-                    } else if (Math.abs(startY - stopY) > THRESHOLD && Math.abs(startX - stopX) < THRESHOLD) {
-                        if (startY > stopY) {
-                            // Swipe up
-                            Toast toast = Toast.makeText(c, "Double Finger Up Swipe", Toast.LENGTH_SHORT);
-                            points.clear();
-                            toast.show();
-                        } else {
-                            //Swipe down
-                            Toast toast = Toast.makeText(c, "Double Finger Down Swipe", Toast.LENGTH_SHORT);
-                            toast.show();
-                        }
-                    }
-                    this.mode = NONE;
-                    break;
+        Point point;
+        switch (event.getAction() & MotionEvent.ACTION_MASK) {
 
-                case MotionEvent.ACTION_MOVE:
-                    if (mode == SWIPE) {
-                        stopY = event.getY(0);
-                        stopX = event.getX(0);
+            case MotionEvent.ACTION_DOWN:
+                point = new Point();
+                point.x = event.getX();
+                point.y = event.getY();
+                curStroke.add(point);
+                invalidate();
+                break;
+
+            case MotionEvent.ACTION_UP:
+                point = new Point();
+                point.x = event.getX();
+                point.y = event.getY();
+                curStroke.add(point);
+                invalidate();
+                curStroke.clear();
+                break;
+
+            case MotionEvent.ACTION_POINTER_DOWN:
+                // This happens when you touch the screen with two fingers
+                mode = SWIPE;
+                startY = event.getY(0);
+                startX = event.getX(0);
+                break;
+
+            case MotionEvent.ACTION_POINTER_UP:
+                // This happens when you release the second finger
+                mode = NONE;
+                if (Math.abs(startX - stopX) > THRESHOLD && Math.abs(startY - stopY) < THRESHOLD) {
+                    if (startX > stopX) {
+                        // Swipe left
+                        Toast toast = Toast.makeText(c, "Double Finger Left Swipe", Toast.LENGTH_SHORT);
+                        numNodes--;
+                        toast.show();
+                    } else {
+                        //Swipe right
+                        Toast toast = Toast.makeText(c, "Double Finger Right Swipe", Toast.LENGTH_SHORT);
+                        numNodes++;
+                        toast.show();
                     }
-                    break;
-            }
+                } else if (Math.abs(startY - stopY) > THRESHOLD && Math.abs(startX - stopX) < THRESHOLD) {
+                    if (startY > stopY) {
+                        // Swipe up
+                        Toast toast = Toast.makeText(c, "Double Finger Up Swipe", Toast.LENGTH_SHORT);
+                        points.clear();
+                        toast.show();
+                    } else {
+                        //Swipe down
+                        Toast toast = Toast.makeText(c, "Double Finger Down Swipe", Toast.LENGTH_SHORT);
+                        toast.show();
+                    }
+                }
+                this.mode = NONE;
+                break;
+
+            case MotionEvent.ACTION_MOVE:
+                if (mode == SWIPE) {
+                    stopY = event.getY(0);
+                    stopX = event.getX(0);
+                }
+                else
+                {
+                    point = new Point();
+                    point.x = event.getX();
+                    point.y = event.getY();
+                    curStroke.add(point);
+                    invalidate();
+                }
+                break;
         }
         return true;
     }
-}
-class Point{
-    float x, y;
 }

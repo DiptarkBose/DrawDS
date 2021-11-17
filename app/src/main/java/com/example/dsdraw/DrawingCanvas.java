@@ -98,6 +98,3 @@ public class DrawingCanvas extends View implements View.OnTouchListener {
         return true;
     }
 }
-class Point{
-    float x, y;
-}
