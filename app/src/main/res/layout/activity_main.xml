@@ -14,15 +14,20 @@
         android:paddingTop="50dp"
         >
 
-        <Button android:id="@+id/drawingCanvasButton"
+        <Button android:id="@+id/treeCanvasButton"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Open Drawing Canvas" />
+            android:text="Open Tree Canvas" />
 
-        <Button android:id="@+id/paintingCanvasButton"
+        <Button android:id="@+id/arrayCanvasButton"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Open Painting Canvas" />
+            android:text="Open Array Canvas" />
+
+        <Button android:id="@+id/llCanvasButton"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Open LL Canvas" />
     </LinearLayout>
 
 </RelativeLayout>
