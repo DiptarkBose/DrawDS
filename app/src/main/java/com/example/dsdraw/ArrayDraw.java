@@ -45,12 +45,15 @@ public class ArrayDraw extends View implements View.OnTouchListener {
         float x1 = 100, y1 = 100, x2 = 200, y2 = 200;
         Paint myPaint = new Paint();
         Paint tentPaint = new Paint();
+
         myPaint.setColor(Color.rgb(0, 0, 0));
         myPaint.setStyle(Paint.Style.STROKE);
         myPaint.setStrokeWidth(10);
+
         tentPaint.setColor(Color.rgb(211,211,211));
         tentPaint.setStyle(Paint.Style.STROKE);
         tentPaint.setStrokeWidth(10);
+
         for(int i=0; i<Math.max(1, numNodes-deleteNodes); i++) {
             canvas.drawRect(x1, y1, x2, y2, myPaint);
             x1 += 100;
@@ -123,8 +126,9 @@ public class ArrayDraw extends View implements View.OnTouchListener {
                     if (startY > stopY) {
                         // Swipe up
                         Toast toast = Toast.makeText(c, "Double Finger Up Swipe", Toast.LENGTH_SHORT);
-                        points.clear();
                         toast.show();
+                        points.clear();
+                        invalidate();
                     } else {
                         //Swipe down
                         Toast toast = Toast.makeText(c, "Double Finger Down Swipe", Toast.LENGTH_SHORT);

@@ -23,6 +23,8 @@ public class LLDraw extends View implements View.OnTouchListener {
     private float stopX;
     private static final int THRESHOLD = 100;
     private static int numNodes = 1;
+    private static int addNodes = 0;
+    private static int deleteNodes = 0;
 
     List<Point> points = new ArrayList<>();
     List<Point> curStroke = new ArrayList<>();
@@ -43,14 +45,23 @@ public class LLDraw extends View implements View.OnTouchListener {
         float x1 = 100, y1 = 100, x2 = 200, y2 = 200;
         Paint myPaint = new Paint();
         Paint arrowPaint = new Paint();
+        Paint tentPaint = new Paint();
+
         myPaint.setColor(Color.rgb(0, 0, 0));
         myPaint.setStyle(Paint.Style.STROKE);
         myPaint.setStrokeWidth(10);
+
         arrowPaint.setColor(Color.rgb(0, 0, 0));
         arrowPaint.setStrokeWidth(10);
+
+        tentPaint.setColor(Color.rgb(211,211,211));
+        tentPaint.setStyle(Paint.Style.STROKE);
+        tentPaint.setStrokeWidth(10);
+
         canvas.drawRect(x1, y1, x2, y2, myPaint);
+
         x1 += 200; x2 += 200;
-        for(int i=0; i<numNodes-1; i++) {
+        for(int i=0; i<numNodes-deleteNodes-1; i++) {
             canvas.drawLine(x1-100, (y1+y2)/2, x1, (y1+y2)/2, myPaint);
             Path path = new Path();
             path.setFillType(Path.FillType.EVEN_ODD);
@@ -60,6 +71,18 @@ public class LLDraw extends View implements View.OnTouchListener {
             path.close();
             canvas.drawPath(path, arrowPaint);
             canvas.drawRect(x1, y1, x2, y2, myPaint);
+            x1 += 200; x2 += 200;
+        }
+        for(int i=0; i<addNodes; i++) {
+            canvas.drawLine(x1-100, (y1+y2)/2, x1, (y1+y2)/2, tentPaint);
+            Path path = new Path();
+            path.setFillType(Path.FillType.EVEN_ODD);
+            path.moveTo(x1-30, ((y1+y2)/2)+25);
+            path.lineTo(x1-30,((y1+y2)/2)-25);
+            path.lineTo(x1,((y1+y2)/2));
+            path.close();
+            canvas.drawPath(path, tentPaint);
+            canvas.drawRect(x1, y1, x2, y2, tentPaint);
             x1 += 200; x2 += 200;
         }
         if(curStroke.size()>2) {
@@ -108,20 +131,25 @@ public class LLDraw extends View implements View.OnTouchListener {
                     if (startX > stopX) {
                         // Swipe left
                         Toast toast = Toast.makeText(c, "Double Finger Left Swipe", Toast.LENGTH_SHORT);
-                        numNodes--;
                         toast.show();
+                        numNodes = Math.max(1, numNodes-deleteNodes);
+                        deleteNodes = 0;
+                        invalidate();
                     } else {
                         //Swipe right
                         Toast toast = Toast.makeText(c, "Double Finger Right Swipe", Toast.LENGTH_SHORT);
-                        numNodes++;
                         toast.show();
+                        numNodes += addNodes;
+                        addNodes = 0;
+                        invalidate();
                     }
                 } else if (Math.abs(startY - stopY) > THRESHOLD && Math.abs(startX - stopX) < THRESHOLD) {
                     if (startY > stopY) {
                         // Swipe up
                         Toast toast = Toast.makeText(c, "Double Finger Up Swipe", Toast.LENGTH_SHORT);
-                        points.clear();
                         toast.show();
+                        points.clear();
+                        invalidate();
                     } else {
                         //Swipe down
                         Toast toast = Toast.makeText(c, "Double Finger Down Swipe", Toast.LENGTH_SHORT);
@@ -135,6 +163,16 @@ public class LLDraw extends View implements View.OnTouchListener {
                 if (mode == SWIPE) {
                     stopY = event.getY(0);
                     stopX = event.getX(0);
+
+                    if(stopX >= startX) {
+                        deleteNodes = 0;
+                        addNodes = (int) ((stopX - startX) / 100);
+                    }
+                    else {
+                        addNodes = 0;
+                        deleteNodes = (int) ((startX - stopX) / 100);
+                    }
+                    invalidate();
                 }
                 else
                 {
