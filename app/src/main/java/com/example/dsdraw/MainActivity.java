@@ -9,9 +9,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button openTreeCanvas = this.findViewById(R.id.treeCanvasButton);
-    Button openArrayCanvas = this.findViewById(R.id.arrayCanvasButton);
-    Button openLLCanvas = this.findViewById(R.id.llCanvasButton);
+    Button openTreeCanvas;
+    Button openArrayCanvas;
+    Button openLLCanvas;
 
     DrawingCanvas drawingCanvas;
     ArrayDraw arrayDraw;
@@ -25,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
         mContext = this;
         this.setContentView(R.layout.activity_main);
 
+        openTreeCanvas = this.findViewById(R.id.treeCanvasButton);
         openTreeCanvas.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        openArrayCanvas = this.findViewById(R.id.arrayCanvasButton);
         openArrayCanvas.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -43,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        openLLCanvas = this.findViewById(R.id.llCanvasButton);
         openLLCanvas.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
