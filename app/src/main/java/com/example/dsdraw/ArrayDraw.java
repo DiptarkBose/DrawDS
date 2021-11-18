@@ -23,6 +23,8 @@ public class ArrayDraw extends View implements View.OnTouchListener {
     private float stopX;
     private static final int THRESHOLD = 100;
     private static int numNodes = 1;
+    private static int addNodes = 0;
+    private static int deleteNodes = 0;
 
     List<Point> points = new ArrayList<>();
     List<Point> curStroke = new ArrayList<>();
@@ -42,11 +44,20 @@ public class ArrayDraw extends View implements View.OnTouchListener {
     public void onDraw(Canvas canvas) {
         float x1 = 100, y1 = 100, x2 = 200, y2 = 200;
         Paint myPaint = new Paint();
+        Paint tentPaint = new Paint();
         myPaint.setColor(Color.rgb(0, 0, 0));
         myPaint.setStyle(Paint.Style.STROKE);
         myPaint.setStrokeWidth(10);
-        for(int i=0; i<numNodes; i++) {
+        tentPaint.setColor(Color.rgb(211,211,211));
+        tentPaint.setStyle(Paint.Style.STROKE);
+        tentPaint.setStrokeWidth(10);
+        for(int i=0; i<Math.max(1, numNodes-deleteNodes); i++) {
             canvas.drawRect(x1, y1, x2, y2, myPaint);
+            x1 += 100;
+            x2 += 100;
+        }
+        for(int i=0; i<addNodes; i++) {
+            canvas.drawRect(x1, y1, x2, y2, tentPaint);
             x1 += 100;
             x2 += 100;
         }
@@ -96,13 +107,17 @@ public class ArrayDraw extends View implements View.OnTouchListener {
                     if (startX > stopX) {
                         // Swipe left
                         Toast toast = Toast.makeText(c, "Double Finger Left Swipe", Toast.LENGTH_SHORT);
-                        numNodes--;
                         toast.show();
+                        numNodes = Math.max(1, numNodes-deleteNodes);
+                        deleteNodes = 0;
+                        invalidate();
                     } else {
                         //Swipe right
                         Toast toast = Toast.makeText(c, "Double Finger Right Swipe", Toast.LENGTH_SHORT);
-                        numNodes++;
                         toast.show();
+                        numNodes += addNodes;
+                        addNodes = 0;
+                        invalidate();
                     }
                 } else if (Math.abs(startY - stopY) > THRESHOLD && Math.abs(startX - stopX) < THRESHOLD) {
                     if (startY > stopY) {
@@ -123,6 +138,16 @@ public class ArrayDraw extends View implements View.OnTouchListener {
                 if (mode == SWIPE) {
                     stopY = event.getY(0);
                     stopX = event.getX(0);
+
+                    if(stopX >= startX) {
+                        deleteNodes = 0;
+                        addNodes = (int) ((stopX - startX) / 100);
+                    }
+                    else {
+                        addNodes = 0;
+                        deleteNodes = (int) ((startX - stopX) / 100);
+                    }
+                    invalidate();
                 }
                 else
                 {
