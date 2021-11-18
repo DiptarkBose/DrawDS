@@ -10,6 +10,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.dsdraw.structures.CanvasPoint;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,8 +28,8 @@ public class LLDraw extends View implements View.OnTouchListener {
     private static int addNodes = 0;
     private static int deleteNodes = 0;
 
-    List<Point> points = new ArrayList<>();
-    List<Point> curStroke = new ArrayList<>();
+    List<CanvasPoint> points = new ArrayList<>();
+    List<CanvasPoint> curStroke = new ArrayList<>();
     Context c;
     Paint paint = new Paint();
 
@@ -86,10 +88,10 @@ public class LLDraw extends View implements View.OnTouchListener {
             x1 += 200; x2 += 200;
         }
         if(curStroke.size()>2) {
-            for(Point point : curStroke)
+            for(CanvasPoint point : curStroke)
                 points.add(point);
         }
-        for (Point point : points) {
+        for (CanvasPoint point : points) {
             canvas.drawCircle(point.x, point.y, 20, paint);
         }
     }
@@ -97,11 +99,11 @@ public class LLDraw extends View implements View.OnTouchListener {
     @Override
     public boolean onTouch(View v, MotionEvent event) {
 
-        Point point;
+        CanvasPoint point;
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
 
             case MotionEvent.ACTION_DOWN:
-                point = new Point();
+                point = new CanvasPoint();
                 point.x = event.getX();
                 point.y = event.getY();
                 curStroke.add(point);
@@ -109,7 +111,7 @@ public class LLDraw extends View implements View.OnTouchListener {
                 break;
 
             case MotionEvent.ACTION_UP:
-                point = new Point();
+                point = new CanvasPoint();
                 point.x = event.getX();
                 point.y = event.getY();
                 curStroke.add(point);
@@ -176,7 +178,7 @@ public class LLDraw extends View implements View.OnTouchListener {
                 }
                 else
                 {
-                    point = new Point();
+                    point = new CanvasPoint();
                     point.x = event.getX();
                     point.y = event.getY();
                     curStroke.add(point);
