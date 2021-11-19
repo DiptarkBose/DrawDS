@@ -35,11 +35,14 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
 
     List<Point> points = new ArrayList<>();
     List<Point> curStroke = new ArrayList<>();
+    List<Character> list1Nodes = new ArrayList<>();
+    List<Character> list2Nodes = new ArrayList<>();
     Context c;
     Paint paint = new Paint();
     Paint myPaint = new Paint();
     Paint arrowPaint = new Paint();
     Paint tentPaint = new Paint();
+    Paint writePaint = new Paint();
     Button addNodeButton, deleteNodeButton;
 
     public LLDraw(Context context, AttributeSet attrs) {
@@ -52,7 +55,8 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
         this.setOnTouchListener(this);
         paint.setColor(Color.BLACK);
         c = context;
-
+        for(char ch='A'; ch<'Z'; ch++)
+            list1Nodes.add(ch);
         addNodeButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 numNodes++;
@@ -83,7 +87,12 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
         tentPaint.setStyle(Paint.Style.STROKE);
         tentPaint.setStrokeWidth(10);
 
+        writePaint.setColor(Color.BLACK);
+        writePaint.setTextSize(70);
+        writePaint.setStrokeWidth(10);
+
         canvas.drawRect(x1, y1, x2, y2, myPaint);
+        canvas.drawText(list1Nodes.get(0)+"", x1+25, y2-25, writePaint);
 
         x1 += 200; x2 += 200;
         for(int i=0; i<numNodes-deleteNodes-1; i++) {
@@ -96,6 +105,10 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
             path.close();
             canvas.drawPath(path, arrowPaint);
             canvas.drawRect(x1, y1, x2, y2, myPaint);
+            writePaint.setColor(Color.BLACK);
+            writePaint.setTextSize(70);
+            writePaint.setStrokeWidth(10);
+            canvas.drawText(list1Nodes.get(i+1)+"", x1+25, y2-25, writePaint);
             x1 += 200; x2 += 200;
         }
         for(int i=0; i<addNodes; i++) {
@@ -108,6 +121,10 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
             path.close();
             canvas.drawPath(path, tentPaint);
             canvas.drawRect(x1, y1, x2, y2, tentPaint);
+            writePaint.setColor(Color.rgb(211,211,211));
+            writePaint.setTextSize(70);
+            writePaint.setStrokeWidth(10);
+            canvas.drawText(list1Nodes.get(numNodes+i)+"", x1+25, y2-25, writePaint);
             x1 += 200; x2 += 200;
         }
         if(curStroke.size()>2) {
