@@ -4,15 +4,21 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
+
+import com.example.dsdraw.structures.BinaryTree;
+import com.example.dsdraw.structures.CanvasPoint;
+import com.example.dsdraw.structures.Node;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class DrawingCanvas extends View implements View.OnTouchListener {
+    private final String TAG = "DrawingCanvas";
+
     private static final int NONE = 0;
     private static final int SWIPE = 1;
     private int mode = NONE;
@@ -21,9 +27,14 @@ public class DrawingCanvas extends View implements View.OnTouchListener {
     private float stopY;
     private float stopX;
     private static final int THRESHOLD = 100;
-    List<Point> points = new ArrayList<>();
+    List<CanvasPoint> points = new ArrayList<>();
     Context c;
     Paint paint = new Paint();
+
+    DrawingManager mDrawingManager;
+
+    BinaryTree tree;
+    CanvasPoint org;
 
     public DrawingCanvas(Context context) {
         super(context);
@@ -32,23 +43,37 @@ public class DrawingCanvas extends View implements View.OnTouchListener {
         this.setOnTouchListener(this);
         paint.setColor(Color.BLACK);
         c = context;
+        tree = BinaryTree.getBasicTree();
+        org = new CanvasPoint(300,300);
+
+        mDrawingManager = new DrawingManager();
     }
 
     @Override
     public void onDraw(Canvas canvas) {
-        for (Point point : points) {
+        for (CanvasPoint point : points) {
             canvas.drawCircle(point.x, point.y, 20, paint);
         }
+        mDrawingManager.drawTree(canvas, tree, org);
     }
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         int numPointers = event.getPointerCount();
         if (numPointers == 1) {
-            Point point = new Point();
-            point.x = event.getX();
-            point.y = event.getY();
-            points.add(point);
+            CanvasPoint touchPoint = new CanvasPoint(event.getX(), event.getY());
+            points.add(touchPoint);
+
+            if(event.getAction() == 0) {
+                Node touchedNode = tree.getNodeOverlappingPoint(touchPoint);
+                if (touchedNode != null) {
+                    Toast toast = Toast.makeText(c, "Touched node: " + touchedNode.label, Toast.LENGTH_SHORT);
+                    toast.show();
+                    Log.e(TAG, "Touched node: " + touchedNode.label + ". " + event.getAction());
+                } else {
+                    Log.e(TAG, "No overlapping node found for touch. " + event.getAction());
+                }
+            }
             invalidate();
         }
         else {
