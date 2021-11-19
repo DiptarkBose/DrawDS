@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class LLDraw extends RelativeLayout implements View.OnTouchListener {
     private static final int NONE = 0;
@@ -199,14 +200,20 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
                         toast.show();
                         if(stopX<=lastNodeX && stopX>=100) {
                             final int curNode = (int)Math.max(1, (Math.ceil((stopX-100)/200)));
+                            String nodeName = (char)(64+curNode)+"";
                             AlertDialog.Builder alertDialog = new AlertDialog.Builder(c);
-                            String[] options = new String[]{"Delete Node "+curNode, "Delete List from Node "+curNode, "Cut List from Node "+curNode};
+                            String[] options = new String[]{"Delete Node "+nodeName, "Delete List from Node "+nodeName, "Cut List from Node "+nodeName};
                             alertDialog.setTitle("Actions for Node "+curNode).
                                     setItems(options, new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int which) {
-                                            if(which == 1)
+                                            if(which == 0)
                                             {
-                                                numNodes = curNode-1;
+                                                list1Nodes.remove(curNode-1);
+                                                numNodes--;
+                                                invalidate();
+                                            }
+                                            else if(which == 1) {
+                                                numNodes = curNode - 1;
                                                 invalidate();
                                             }
                                         }
