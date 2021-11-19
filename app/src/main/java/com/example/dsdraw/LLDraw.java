@@ -1,6 +1,8 @@
 package com.example.dsdraw;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -175,8 +177,25 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
                         invalidate();
                     } else {
                         //Swipe down
-                        Toast toast = Toast.makeText(c, "Double Finger Down Swipe", Toast.LENGTH_SHORT);
+                        float lastNodeX = 100+(200*numNodes);
+                        Toast toast = Toast.makeText(c, lastNodeX+" "+stopX, Toast.LENGTH_SHORT);
                         toast.show();
+                        if(stopX<=lastNodeX && stopX>=100) {
+                            final int curNode = (int)Math.max(1, (Math.ceil((stopX-100)/200)));
+                            AlertDialog.Builder alertDialog = new AlertDialog.Builder(c);
+                            String[] options = new String[]{"Delete Node "+curNode, "Delete List from Node "+curNode, "Cut List from Node "+curNode};
+                            alertDialog.setTitle("Actions for Node "+curNode).
+                                    setItems(options, new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            if(which == 1)
+                                            {
+                                                numNodes = curNode-1;
+                                                invalidate();
+                                            }
+                                        }
+                                    });
+                            alertDialog.show();
+                        }
                     }
                 }
                 this.mode = NONE;
