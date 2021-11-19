@@ -6,14 +6,19 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.NumberPicker;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class LLDraw extends View implements View.OnTouchListener {
+public class LLDraw extends RelativeLayout implements View.OnTouchListener {
     private static final int NONE = 0;
     private static final int SWIPE = 1;
     private int mode = NONE;
@@ -22,31 +27,49 @@ public class LLDraw extends View implements View.OnTouchListener {
     private float stopY;
     private float stopX;
     private static final int THRESHOLD = 100;
-    private static int numNodes = 1;
-    private static int addNodes = 0;
-    private static int deleteNodes = 0;
+    public static int numNodes = 1;
+    public static int addNodes = 0;
+    public static int deleteNodes = 0;
 
     List<Point> points = new ArrayList<>();
     List<Point> curStroke = new ArrayList<>();
     Context c;
     Paint paint = new Paint();
+    Paint myPaint = new Paint();
+    Paint arrowPaint = new Paint();
+    Paint tentPaint = new Paint();
+    Button addNodeButton, deleteNodeButton;
 
-    public LLDraw(Context context) {
+    public LLDraw(Context context, AttributeSet attrs) {
         super(context);
-        setFocusable(true);
-        setFocusableInTouchMode(true);
+        inflate(context, R.layout.lldraw, this);
+        this.setWillNotDraw(false);
+        addNodeButton = (Button) findViewById(R.id.node_increment);
+        deleteNodeButton = (Button) findViewById(R.id.node_decrement);
+
         this.setOnTouchListener(this);
         paint.setColor(Color.BLACK);
         c = context;
+
+        addNodeButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                numNodes++;
+                invalidate();
+            }
+        });
+
+        deleteNodeButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                numNodes--;
+                invalidate();
+            }
+        });
     }
+
 
     @Override
     public void onDraw(Canvas canvas) {
-        float x1 = 100, y1 = 100, x2 = 200, y2 = 200;
-        Paint myPaint = new Paint();
-        Paint arrowPaint = new Paint();
-        Paint tentPaint = new Paint();
-
+        float x1 = 100, y1 = 200, x2 = 200, y2 = 300;
         myPaint.setColor(Color.rgb(0, 0, 0));
         myPaint.setStyle(Paint.Style.STROKE);
         myPaint.setStrokeWidth(10);
