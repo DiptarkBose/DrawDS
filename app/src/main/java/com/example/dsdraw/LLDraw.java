@@ -130,6 +130,31 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
             canvas.drawText(list1Nodes.get(numNodes+i)+"", x1+25, y2-25, writePaint);
             x1 += 200; x2 += 200;
         }
+        if(list2Nodes.size()>0)
+        {
+            float list2X1, list2X2, list2Y1, list2Y2;
+            list2X1 = 100; list2Y1 = 400; list2X2 = 200; list2Y2 = 500;
+            canvas.drawRect(list2X1, list2Y1, list2X2, list2Y2, myPaint);
+            canvas.drawText(list2Nodes.get(0)+"", list2X1+25, list2Y2-25, writePaint);
+
+            list2X1 += 200; list2X2 += 200;
+            for(int i=0; i<list2Nodes.size()-1; i++) {
+                canvas.drawLine(list2X1-100, (list2Y1+list2Y2)/2, list2X1, (list2Y1+list2Y2)/2, myPaint);
+                Path path = new Path();
+                path.setFillType(Path.FillType.EVEN_ODD);
+                path.moveTo(list2X1-30, ((list2Y1+list2Y2)/2)+25);
+                path.lineTo(list2X1-30,((list2Y1+list2Y2)/2)-25);
+                path.lineTo(list2X1,((list2Y1+list2Y2)/2));
+                path.close();
+                canvas.drawPath(path, arrowPaint);
+                canvas.drawRect(list2X1, list2Y1, list2X2, list2Y2, myPaint);
+                writePaint.setColor(Color.BLACK);
+                writePaint.setTextSize(70);
+                writePaint.setStrokeWidth(10);
+                canvas.drawText(list2Nodes.get(i+1)+"", list2X1+25, list2Y2-25, writePaint);
+                list2X1 += 200; list2X2 += 200;
+            }
+        }
         if(curStroke.size()>2) {
             for(CanvasPoint point : curStroke)
                 points.add(point);
@@ -198,14 +223,12 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
                     } else {
                         //Swipe down
                         float lastNodeX = 100+(200*numNodes);
-                        Toast toast = Toast.makeText(c, lastNodeX+" "+stopX, Toast.LENGTH_SHORT);
-                        toast.show();
                         if(stopX<=lastNodeX && stopX>=100) {
                             final int curNode = (int)Math.max(1, (Math.ceil((stopX-100)/200)));
-                            String nodeName = (char)(64+curNode)+"";
+                            String nodeName = list1Nodes.get(curNode-1)+"";
                             AlertDialog.Builder alertDialog = new AlertDialog.Builder(c);
-                            String[] options = new String[]{"Delete Node "+nodeName, "Delete List from Node "+nodeName, "Cut List from Node "+nodeName};
-                            alertDialog.setTitle("Actions for Node "+curNode).
+                            String[] options = new String[]{"Delete Node "+nodeName, "Delete List from Node "+nodeName, "Make new list from Node "+nodeName};
+                            alertDialog.setTitle("Actions for Node "+nodeName).
                                     setItems(options, new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int which) {
                                             if(which == 0)
@@ -215,6 +238,16 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
                                                 invalidate();
                                             }
                                             else if(which == 1) {
+                                                numNodes = curNode - 1;
+                                                invalidate();
+                                            }
+                                            else
+                                            {
+                                                int i;
+                                                for(i=curNode-1; i<numNodes; i++)
+                                                    list2Nodes.add(list1Nodes.get(i));
+                                                for(i=curNode-1; i<numNodes; i++)
+                                                    list1Nodes.remove(curNode-1);
                                                 numNodes = curNode - 1;
                                                 invalidate();
                                             }
