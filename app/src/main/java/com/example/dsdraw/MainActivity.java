@@ -13,6 +13,8 @@ package com.example.dsdraw;
         import android.widget.NumberPicker;
         import android.widget.Toast;
 
+        import com.example.dsdraw.structures.CanvasPoint;
+
         import java.util.ArrayList;
         import java.util.List;
         import java.util.Random;
@@ -24,6 +26,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
     }
+
+
 }
 
 // import android.content.Context;

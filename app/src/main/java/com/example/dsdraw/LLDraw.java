@@ -23,7 +23,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import androidx.core.view.MotionEventCompat;
+
 public class LLDraw extends RelativeLayout implements View.OnTouchListener {
+
+    private static final String TAG = "LLDraw";
+
     private static final int NONE = 0;
     private static final int SWIPE = 1;
     private int mode = NONE;
@@ -142,6 +147,16 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
     @Override
     public boolean onTouch(View v, MotionEvent event) {
 
+        Log.d(TAG, "Point0: " + event.getX(0) + ":" + event.getY(0) + ";" );
+        if (event.getPointerCount() > 1) {
+            Log.d(TAG, "Point1: " + event.getX(1) + ":" + event.getY(1) + ";");
+        }
+        if (event.getPointerCount() > 2) {
+            Log.d(TAG, "Point2: " + event.getX(2) + ":" + event.getY(2) + ";");
+        }
+//        if (event.getActionIndex() > 0) {
+//            Log.d(TAG, "Point: " + event.getX() + ":" + event.getY() + ";" + event.getActionIndex());
+//        }
         CanvasPoint point;
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
 
@@ -158,6 +173,9 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
                 point.x = event.getX();
                 point.y = event.getY();
                 curStroke.add(point);
+                DrawingManager dm = new DrawingManager();
+                DrawingManager.LineDirection ld = dm.calcDir(curStroke.get(0), curStroke.get(curStroke.size() - 1));
+                Log.d(TAG, "Direction of stroke: " + ld.name());
                 invalidate();
                 curStroke.clear();
                 break;
