@@ -122,6 +122,4 @@ public class DrawingCanvas extends View implements View.OnTouchListener {
         }
         return true;
     }
-
-
 }

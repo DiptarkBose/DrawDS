@@ -7,22 +7,34 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <LinearLayout
+    <com.example.dsdraw.LLDraw
+        android:id="@+id/canvas"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
+    </com.example.dsdraw.LLDraw>
+    
+
+</RelativeLayout>
+
+<!-- <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:paddingTop="50dp"
         >
 
-        <Button android:id="@+id/drawingCanvasButton"
+        <Button android:id="@+id/treeCanvasButton"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Open Drawing Canvas" />
+            android:text="Open Tree Canvas" />
 
-        <Button android:id="@+id/paintingCanvasButton"
+        <Button android:id="@+id/arrayCanvasButton"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Open Painting Canvas" />
-    </LinearLayout>
+            android:text="Open Array Canvas" />
 
-</RelativeLayout>
+        <Button android:id="@+id/llCanvasButton"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Open LL Canvas" />
+    </LinearLayout> -->
