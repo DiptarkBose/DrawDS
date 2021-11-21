@@ -36,15 +36,13 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
     private float startX;
     private float stopY;
     private float stopX;
+    public static float hx1, hx2, hy1, hy2;
     private static final int THRESHOLD = 100;
     public static int numNodes = 1;
     public static int addNodes = 0;
     public static int deleteNodes = 0;
     public static boolean animate = false;
     public static int highlightBox;
-    final AtomicReference<Canvas> atCanvas = new AtomicReference<>();
-    public Bitmap bitmap;
-    public final Canvas globalCanvas;
 
     List<Character> list1Nodes = new ArrayList<>();
     List<Character> list2Nodes = new ArrayList<>();
@@ -56,6 +54,7 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
     Paint myPaint = new Paint();
     Paint arrowPaint = new Paint();
     Paint tentPaint = new Paint();
+    Paint highlightPaint = new Paint();
     public Paint writePaint = new Paint();
 
     Button addNodeButton, deleteNodeButton, llTraversal;
@@ -69,8 +68,6 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
         addNodeButton = (Button) findViewById(R.id.node_increment);
         deleteNodeButton = (Button) findViewById(R.id.node_decrement);
         llTraversal = (Button) findViewById(R.id.ll_animate);
-        bitmap = Bitmap.createBitmap(1200, 1200, Bitmap.Config.ARGB_8888);
-        globalCanvas = new Canvas(bitmap);
 
         this.setOnTouchListener(this);
         paint.setColor(Color.BLACK);
@@ -94,6 +91,9 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
         llTraversal.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 animate = true;
+                highlightBox = 0;
+                hx1 = 100+(100*highlightBox);
+                hx2 = hx1+100; hy1 = 200; hy2 = 300;
                 invalidate();
             }
         });
@@ -117,6 +117,9 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
         writePaint.setColor(Color.BLACK);
         writePaint.setTextSize(70);
         writePaint.setStrokeWidth(10);
+
+        highlightPaint.setColor(Color.rgb(0, 255, 0));
+        highlightPaint.setStrokeWidth(10);
 
         canvas.drawRect(x1, y1, x2, y2, myPaint);
         canvas.drawText(list1Nodes.get(0)+"", x1+25, y2-25, writePaint);
@@ -186,37 +189,34 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
         for (CanvasPoint point : points) {
             canvas.drawCircle(point.x, point.y, 20, paint);
         }
-        // If we need to animate
         if(animate)
         {
-            animate = false;
-            final Canvas finalCanvas = canvas; // Made because thread can't use variable which ain't final.
-            animateThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    float x1 = 100, y1 = 200, x2 = 200, y2 = 300;
-                    Paint highlightPaint = new Paint();
-                    highlightPaint.setColor(Color.rgb(0, 255, 0));
-                    highlightPaint.setStrokeWidth(10);
-
-                    for(int i=0; i<numNodes-deleteNodes; i++) {
-                        finalCanvas.drawRect(x1, y1, x2, y2, highlightPaint);
-                        writePaint.setColor(Color.BLACK);
-                        writePaint.setTextSize(70);
-                        writePaint.setStrokeWidth(10);
-                        finalCanvas.drawText(list1Nodes.get(i)+"", x1+25, y2-25, writePaint);
-                        Log.d("Loop var", i+"");
-                        x1 += 200; x2 += 200;
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                            Log.d("Crash", i+"");
-                        }
-                    }
+            Log.d("Highlight", highlightBox+"");
+            if(highlightBox == numNodes){
+                highlightBox = 0;
+                animate = false;
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-            });
-            animateThread.start();
+            }
+            else
+            {
+                canvas.drawRect(hx1, hy1, hx2, hy2, highlightPaint);
+                writePaint.setColor(Color.BLACK);
+                writePaint.setTextSize(70);
+                writePaint.setStrokeWidth(10);
+                canvas.drawText(list1Nodes.get(highlightBox)+"", hx1+25, hy2-25, writePaint);
+                highlightBox++;
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                hx1 += 200; hx2 = hx1+100;
+                invalidate();
+            }
         }
     }
 
