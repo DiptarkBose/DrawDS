@@ -94,6 +94,40 @@ public class StrokeManager {
                 updateStrokeDirections();
                 break;
         }
+        tryDetectZoom();
+    }
+
+    private int mappingLineDirections(LineDirection ld) {
+        switch (ld) {
+            case L: return 1;
+            case R: return -1;
+            case U: return 2;
+            case D: return -2;
+            case UL: return 3;
+            case DR: return -3;
+            case UR: return 4;
+            case DL: return -4;
+            case NONE: return 0;
+            case TOUCH: return 5;
+            default: return 100;
+        }
+    }
+
+    private boolean tryDetectZoom() {
+        if (mMultiStrokeStore.getCurrentActiveFingers() == 2) {
+            if (mappingLineDirections(strokeDirections.get(0)) == -mappingLineDirections(strokeDirections.get(1))) {
+                int startDist = MultiStrokeStore.calcMag(mMultiStrokeStore.getStrokeForFinger(0).get(0),
+                        mMultiStrokeStore.getStrokeForFinger(1).get(0));
+                int endDist = MultiStrokeStore.calcMag(mMultiStrokeStore.getStrokeForFinger(0).get(mMultiStrokeStore.getStrokeForFinger(0).size() - 1),
+                        mMultiStrokeStore.getStrokeForFinger(1).get(mMultiStrokeStore.getStrokeForFinger(1).size() - 1));
+                if (startDist > endDist) {
+                    Log.d(TAG, "tryDetectZoom found zoom in");
+                } else {
+                    Log.d(TAG, "tryDetectZoom found zoom out");
+                }
+            }
+        }
+        return false;
     }
 
     private int approxSlope (double absSlope) {
@@ -111,8 +145,8 @@ public class StrokeManager {
         CanvasPoint p2 = new CanvasPoint(_p2);
         p2.y = -p2.y;
         p1.y = -p1.y;
-        double mag =  Math.sqrt((double)((p2.y - p1.y) * (p2.y - p1.y) + (p2.x - p1.x) * (p2.x - p1.x)));
-        Log.d(TAG, "Mag = " + mag);
+//        double mag =  Math.sqrt((double)((p2.y - p1.y) * (p2.y - p1.y) + (p2.x - p1.x) * (p2.x - p1.x)));
+//        Log.d(TAG, "Mag = " + mag);
         double slope = Integer.MAX_VALUE * Math.signum(p2.y - p1.y);
         if( p2.x != p1.x) {
             slope = (((double) p2.y - p1.y) / ((double) p2.x - p1.x));

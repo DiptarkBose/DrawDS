@@ -17,7 +17,7 @@ public class MultiStrokeStore {
     private int mCurrentActiveFingers = 0;
     private int mMaxActiveFingers = 0;
 
-    List<List<CanvasPoint>> curstrokes;
+    private List<List<CanvasPoint>> curstrokes;
 
     public MultiStrokeStore(){
         curstrokes = new ArrayList<List<CanvasPoint>>(MAX_FINGERS);
@@ -57,7 +57,7 @@ public class MultiStrokeStore {
         }
     }
 
-    private int calcMag(CanvasPoint p1, CanvasPoint p2) {
+    public static int calcMag(CanvasPoint p1, CanvasPoint p2) {
         if(p1 == null || p2 == null) {
             return 0;
         }
