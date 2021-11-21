@@ -3,10 +3,14 @@ package com.example.dsdraw;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -22,6 +26,7 @@ import com.example.dsdraw.structures.CanvasPoint;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class LLDraw extends RelativeLayout implements View.OnTouchListener {
     private static final int NONE = 0;
@@ -35,18 +40,27 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
     public static int numNodes = 1;
     public static int addNodes = 0;
     public static int deleteNodes = 0;
+    public static boolean animate = false;
+    public static int highlightBox;
+    final AtomicReference<Canvas> atCanvas = new AtomicReference<>();
+    public Bitmap bitmap;
+    public final Canvas globalCanvas;
 
     List<Character> list1Nodes = new ArrayList<>();
     List<Character> list2Nodes = new ArrayList<>();
     List<CanvasPoint> points = new ArrayList<>();
     List<CanvasPoint> curStroke = new ArrayList<>();
+
     Context c;
     Paint paint = new Paint();
     Paint myPaint = new Paint();
     Paint arrowPaint = new Paint();
     Paint tentPaint = new Paint();
-    Paint writePaint = new Paint();
-    Button addNodeButton, deleteNodeButton;
+    public Paint writePaint = new Paint();
+
+    Button addNodeButton, deleteNodeButton, llTraversal;
+
+    Thread animateThread;
 
     public LLDraw(Context context, AttributeSet attrs) {
         super(context);
@@ -54,6 +68,9 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
         this.setWillNotDraw(false);
         addNodeButton = (Button) findViewById(R.id.node_increment);
         deleteNodeButton = (Button) findViewById(R.id.node_decrement);
+        llTraversal = (Button) findViewById(R.id.ll_animate);
+        bitmap = Bitmap.createBitmap(1200, 1200, Bitmap.Config.ARGB_8888);
+        globalCanvas = new Canvas(bitmap);
 
         this.setOnTouchListener(this);
         paint.setColor(Color.BLACK);
@@ -73,13 +90,20 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
                 invalidate();
             }
         });
-    }
 
+        llTraversal.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                animate = true;
+                invalidate();
+            }
+        });
+    }
 
     @Override
     public void onDraw(Canvas canvas) {
         float x1 = 100, y1 = 200, x2 = 200, y2 = 300;
         myPaint.setColor(Color.rgb(0, 0, 0));
+
         myPaint.setStyle(Paint.Style.STROKE);
         myPaint.setStrokeWidth(10);
 
@@ -161,6 +185,38 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
         }
         for (CanvasPoint point : points) {
             canvas.drawCircle(point.x, point.y, 20, paint);
+        }
+        // If we need to animate
+        if(animate)
+        {
+            animate = false;
+            final Canvas finalCanvas = canvas; // Made because thread can't use variable which ain't final.
+            animateThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    float x1 = 100, y1 = 200, x2 = 200, y2 = 300;
+                    Paint highlightPaint = new Paint();
+                    highlightPaint.setColor(Color.rgb(0, 255, 0));
+                    highlightPaint.setStrokeWidth(10);
+
+                    for(int i=0; i<numNodes-deleteNodes; i++) {
+                        finalCanvas.drawRect(x1, y1, x2, y2, highlightPaint);
+                        writePaint.setColor(Color.BLACK);
+                        writePaint.setTextSize(70);
+                        writePaint.setStrokeWidth(10);
+                        finalCanvas.drawText(list1Nodes.get(i)+"", x1+25, y2-25, writePaint);
+                        Log.d("Loop var", i+"");
+                        x1 += 200; x2 += 200;
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                            Log.d("Crash", i+"");
+                        }
+                    }
+                }
+            });
+            animateThread.start();
         }
     }
 
