@@ -95,6 +95,19 @@ public class StrokeManager {
                 break;
         }
         tryDetectZoom();
+        tryDetectPan();
+    }
+
+    private void tryDetectPan() {
+        if (mMultiStrokeStore.getCurrentActiveFingers() == 3
+                && strokeDirections.get(2) != LineDirection.TOUCH
+                && strokeDirections.get(2) != LineDirection.NONE) {
+            float xOff = mMultiStrokeStore.getStrokeForFinger(2).get(0).x -
+                    mMultiStrokeStore.getStrokeForFinger(2).get(mMultiStrokeStore.getStrokeForFinger(2).size() - 1).x;
+            float yOff = mMultiStrokeStore.getStrokeForFinger(2).get(0).y -
+                    mMultiStrokeStore.getStrokeForFinger(2).get(mMultiStrokeStore.getStrokeForFinger(2).size() - 1).y;
+            Log.d(TAG, "Pan detected xoff:" + xOff + ";yOff:" + yOff);
+        }
     }
 
     private int mappingLineDirections(LineDirection ld) {
