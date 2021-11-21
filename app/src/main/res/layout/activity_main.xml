@@ -7,16 +7,7 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <com.example.dsdraw.LLDraw
-        android:id="@+id/canvas"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent">
-    </com.example.dsdraw.LLDraw>
-    
-
-</RelativeLayout>
-
-<!-- <LinearLayout
+     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -37,4 +28,15 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="Open LL Canvas" />
-    </LinearLayout> -->
+    </LinearLayout>
+    
+
+</RelativeLayout>
+
+
+
+    <!--    <com.example.dsdraw.LLDraw-->
+    <!--        android:id="@+id/canvas"-->
+    <!--        android:layout_height="match_parent"-->
+    <!--        android:layout_width="match_parent">-->
+    <!--    </com.example.dsdraw.LLDraw>-->

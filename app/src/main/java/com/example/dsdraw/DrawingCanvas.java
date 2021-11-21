@@ -36,6 +36,8 @@ public class DrawingCanvas extends View implements View.OnTouchListener {
     BinaryTree tree;
     CanvasPoint org;
 
+    StrokeManager mStrokeManager;
+
     public DrawingCanvas(Context context) {
         super(context);
         setFocusable(true);
@@ -47,79 +49,87 @@ public class DrawingCanvas extends View implements View.OnTouchListener {
         org = new CanvasPoint(300,300);
 
         mDrawingManager = new DrawingManager();
+        mStrokeManager = new StrokeManager(TAG);
     }
 
     @Override
     public void onDraw(Canvas canvas) {
-        for (CanvasPoint point : points) {
-            canvas.drawCircle(point.x, point.y, 20, paint);
-        }
+//        for (CanvasPoint point : points) {
+//            canvas.drawCircle(point.x, point.y, 20, paint);
+//        }
         mDrawingManager.drawTree(canvas, tree, org);
+        mStrokeManager.drawStrokes(canvas);
     }
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        int numPointers = event.getPointerCount();
-        if (numPointers == 1) {
-            CanvasPoint touchPoint = new CanvasPoint(event.getX(), event.getY());
-            points.add(touchPoint);
-
-            if(event.getAction() == 0) {
-                Node touchedNode = tree.getNodeOverlappingPoint(touchPoint);
-                if (touchedNode != null) {
-                    Toast toast = Toast.makeText(c, "Touched node: " + touchedNode.label, Toast.LENGTH_SHORT);
-                    toast.show();
-                    Log.e(TAG, "Touched node: " + touchedNode.label + ". " + event.getAction());
-                } else {
-                    Log.e(TAG, "No overlapping node found for touch. " + event.getAction());
-                }
-            }
+        if((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_POINTER_UP
+                || (event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_UP) {
             invalidate();
         }
-        else {
-            switch (event.getAction() & MotionEvent.ACTION_MASK) {
-                case MotionEvent.ACTION_POINTER_DOWN:
-                    // This happens when you touch the screen with two fingers
-                    mode = SWIPE;
-                    startY = event.getY(0);
-                    startX = event.getX(0);
-                    break;
-
-                case MotionEvent.ACTION_POINTER_UP:
-                    // This happens when you release the second finger
-                    mode = NONE;
-                    if (Math.abs(startX - stopX) > THRESHOLD && Math.abs(startY - stopY) < THRESHOLD) {
-                        if (startX > stopX) {
-                            // Swipe left
-                            Toast toast = Toast.makeText(c, "Double Finger Left Swipe", Toast.LENGTH_SHORT);
-                            toast.show();
-                        } else {
-                            //Swipe right
-                            Toast toast = Toast.makeText(c, "Double Finger Right Swipe", Toast.LENGTH_SHORT);
-                            toast.show();
-                        }
-                    } else if (Math.abs(startY - stopY) > THRESHOLD && Math.abs(startX - stopX) < THRESHOLD) {
-                        if (startY > stopY) {
-                            // Swipe up
-                            Toast toast = Toast.makeText(c, "Double Finger Up Swipe", Toast.LENGTH_SHORT);
-                            toast.show();
-                        } else {
-                            //Swipe down
-                            Toast toast = Toast.makeText(c, "Double Finger Down Swipe", Toast.LENGTH_SHORT);
-                            toast.show();
-                        }
-                    }
-                    this.mode = NONE;
-                    break;
-
-                case MotionEvent.ACTION_MOVE:
-                    if (mode == SWIPE) {
-                        stopY = event.getY(0);
-                        stopX = event.getX(0);
-                    }
-                    break;
-            }
-        }
+        mStrokeManager.onTouch(event);
         return true;
+//        int numPointers = event.getPointerCount();
+//        if (numPointers == 1) {
+//            CanvasPoint touchPoint = new CanvasPoint(event.getX(), event.getY());
+//            points.add(touchPoint);
+//
+//            if(event.getAction() == 0) {
+//                Node touchedNode = tree.getNodeOverlappingPoint(touchPoint);
+//                if (touchedNode != null) {
+//                    Toast toast = Toast.makeText(c, "Touched node: " + touchedNode.label, Toast.LENGTH_SHORT);
+//                    toast.show();
+//                    Log.e(TAG, "Touched node: " + touchedNode.label + ". " + event.getAction());
+//                } else {
+//                    Log.e(TAG, "No overlapping node found for touch. " + event.getAction());
+//                }
+//            }
+//            invalidate();
+//        }
+//        else {
+//            switch (event.getAction() & MotionEvent.ACTION_MASK) {
+//                case MotionEvent.ACTION_POINTER_DOWN:
+//                    // This happens when you touch the screen with two fingers
+//                    mode = SWIPE;
+//                    startY = event.getY(0);
+//                    startX = event.getX(0);
+//                    break;
+//
+//                case MotionEvent.ACTION_POINTER_UP:
+//                    // This happens when you release the second finger
+//                    mode = NONE;
+//                    if (Math.abs(startX - stopX) > THRESHOLD && Math.abs(startY - stopY) < THRESHOLD) {
+//                        if (startX > stopX) {
+//                            // Swipe left
+//                            Toast toast = Toast.makeText(c, "Double Finger Left Swipe", Toast.LENGTH_SHORT);
+//                            toast.show();
+//                        } else {
+//                            //Swipe right
+//                            Toast toast = Toast.makeText(c, "Double Finger Right Swipe", Toast.LENGTH_SHORT);
+//                            toast.show();
+//                        }
+//                    } else if (Math.abs(startY - stopY) > THRESHOLD && Math.abs(startX - stopX) < THRESHOLD) {
+//                        if (startY > stopY) {
+//                            // Swipe up
+//                            Toast toast = Toast.makeText(c, "Double Finger Up Swipe", Toast.LENGTH_SHORT);
+//                            toast.show();
+//                        } else {
+//                            //Swipe down
+//                            Toast toast = Toast.makeText(c, "Double Finger Down Swipe", Toast.LENGTH_SHORT);
+//                            toast.show();
+//                        }
+//                    }
+//                    this.mode = NONE;
+//                    break;
+//
+//                case MotionEvent.ACTION_MOVE:
+//                    if (mode == SWIPE) {
+//                        stopY = event.getY(0);
+//                        stopX = event.getX(0);
+//                    }
+//                    break;
+//            }
+//        }
+//        return true;
     }
 }

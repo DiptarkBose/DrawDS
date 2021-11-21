@@ -173,9 +173,9 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
                 point.x = event.getX();
                 point.y = event.getY();
                 curStroke.add(point);
-                DrawingManager dm = new DrawingManager();
-                DrawingManager.LineDirection ld = dm.calcDir(curStroke.get(0), curStroke.get(curStroke.size() - 1));
-                Log.d(TAG, "Direction of stroke: " + ld.name());
+//                DrawingManager dm = new DrawingManager();
+//                DrawingManager.LineDirection ld = dm.calcDir(curStroke.get(0), curStroke.get(curStroke.size() - 1));
+//                Log.d(TAG, "Direction of stroke: " + ld.name());
                 invalidate();
                 curStroke.clear();
                 break;
