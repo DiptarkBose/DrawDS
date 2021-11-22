@@ -22,6 +22,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.example.dsdraw.structures.CanvasPoint;
+import com.example.dsdraw.ColoredStroke;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -334,7 +335,8 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
                         // Swipe up
                         //Toast toast = Toast.makeText(c, "Double Finger Up Swipe", Toast.LENGTH_SHORT);
                         //toast.show();
-                        points.clear();
+                        if(allStrokes.size()>0)
+                            allStrokes.remove(allStrokes.size()-1);
                         invalidate();
                     } else {
                         //Swipe down
