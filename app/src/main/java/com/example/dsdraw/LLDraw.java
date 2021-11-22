@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
+import top.defaults.colorpicker.ColorPickerPopup;
+
 public class LLDraw extends RelativeLayout implements View.OnTouchListener {
     private static final int NONE = 0;
     private static final int SWIPE = 1;
@@ -42,7 +44,9 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
     public static int addNodes = 0;
     public static int deleteNodes = 0;
     public static boolean animate = false;
-    public static int highlightBox;
+    public static int highlightBox, mDefaultColor;
+
+    private Button mPickColorButton;
 
     List<Character> list1Nodes = new ArrayList<>();
     List<Character> list2Nodes = new ArrayList<>();
@@ -59,15 +63,39 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
 
     Button addNodeButton, deleteNodeButton, llTraversal;
 
-    Thread animateThread;
-
-    public LLDraw(Context context, AttributeSet attrs) {
+    public LLDraw(final Context context, AttributeSet attrs) {
         super(context);
         inflate(context, R.layout.lldraw, this);
         this.setWillNotDraw(false);
         addNodeButton = (Button) findViewById(R.id.node_increment);
         deleteNodeButton = (Button) findViewById(R.id.node_decrement);
         llTraversal = (Button) findViewById(R.id.ll_animate);
+
+        mPickColorButton = findViewById(R.id.pick_color_button);
+        mDefaultColor = 0;
+
+        mPickColorButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                new ColorPickerPopup.Builder(context).initialColor(Color.RED)
+                    .enableBrightness(true)
+                    .enableAlpha(true)
+                    .okTitle("Choose")
+                    .cancelTitle("Cancel")
+                    .showIndicator(true)
+                    .showValue(true)
+                    .build()
+                    .show(v, new ColorPickerPopup.ColorPickerObserver() {
+                        @Override
+                        public void
+                        onColorPicked(int color) {
+                            mDefaultColor = color;
+                            paint.setColor(mDefaultColor);
+                        }
+                    });
+            }
+        });
+
 
         this.setOnTouchListener(this);
         paint.setColor(Color.BLACK);
