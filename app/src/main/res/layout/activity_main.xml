@@ -13,4 +13,14 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:text="Linked List Canvas"/>
+
+    <Button
+        android:id="@+id/tree_canvas"
+        android:layout_height="wrap_content"
+        android:layout_width="170dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_below="@id/ll_canvas"
+        android:layout_marginTop="10dp"
+        android:text="Binary Tree Canvas"/>
 </RelativeLayout>

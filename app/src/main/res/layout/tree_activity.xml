@@ -7,11 +7,11 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <com.example.dsdraw.LLDraw
+    <com.example.dsdraw.TreeDraw
         android:id="@+id/canvas"
         android:layout_height="match_parent"
         android:layout_width="match_parent">
-    </com.example.dsdraw.LLDraw>
-    
+    </com.example.dsdraw.TreeDraw>
+
 
 </RelativeLayout>

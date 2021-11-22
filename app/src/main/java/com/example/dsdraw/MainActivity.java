@@ -9,18 +9,27 @@ import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button llCanvas;
+    Button llCanvas, treeCanvas;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         llCanvas = (Button) findViewById(R.id.ll_canvas);
+        treeCanvas = (Button) findViewById(R.id.tree_canvas);
 
         llCanvas.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(v.getContext(), LLActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        treeCanvas.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(v.getContext(), TreeActivity.class);
                 startActivity(intent);
             }
         });
