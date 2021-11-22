@@ -47,6 +47,7 @@ public class DrawingCanvas extends View implements View.OnTouchListener {
         setFocusableInTouchMode(true);
         this.setOnTouchListener(this);
         paint.setColor(Color.BLACK);
+        paint.setStrokeWidth(20);
         c = context;
         tree = BinaryTree.getBasicTree();
         org = new CanvasPoint(TRUE_ORIGIN_X,TRUE_ORIGIN_Y);
@@ -61,14 +62,22 @@ public class DrawingCanvas extends View implements View.OnTouchListener {
     public void onDraw(Canvas canvas) {
         Log.d(TAG, "onDraw drawnPoints size = " + drawnPoints.size());
         for(List<CanvasPoint> points : drawnPoints) {
-            for (CanvasPoint point : points) {
-                canvas.drawCircle(point.x, point.y, 20, paint);
+//            for (CanvasPoint point : points) {
+//                canvas.drawCircle(point.x, point.y, 20, paint);
+//            }
+            for (int i = 0; i < points.size() - 2; i++) {
+                canvas.drawLine(points.get(i).x, points.get(i).y, points.get(i+1).x, points.get(i+1).y, paint);
             }
         }
         //Draw current stroke
-        for (CanvasPoint point : mStrokeManager.getCurrentStroke()) {
-            canvas.drawCircle(point.x, point.y, 20, paint);
+//        for (CanvasPoint point : mStrokeManager.getCurrentStroke()) {
+//            canvas.drawCircle(point.x, point.y, 20, paint);
+//        }
+        List<CanvasPoint> points = mStrokeManager.getCurrentStroke();
+        for (int i = 0; i < points.size() - 2; i++) {
+            canvas.drawLine(points.get(i).x, points.get(i).y, points.get(i+1).x, points.get(i+1).y, paint);
         }
+
         mDrawingManager.drawTree(canvas, tree, org);
 //        mStrokeManager.drawStrokes(canvas);
     }
