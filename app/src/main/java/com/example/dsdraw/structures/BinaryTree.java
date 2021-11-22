@@ -57,7 +57,9 @@ public class BinaryTree
         tree.root = new Node('A');
         tree.root.left = new Node('B');
         tree.root.right = new Node('C');
+        tree.root.right.setSelected(true);
         tree.root.left.left = new Node('D');
+        tree.root.left.left.setPrompt(true);
         return tree;
     }
 
@@ -91,5 +93,85 @@ public class BinaryTree
 
     private boolean isPointInCircle(CanvasPoint centre, CanvasPoint point, int radius) {
         return ((centre.x - point.x)*(centre.x - point.x) + (centre.y - point.y)*(centre.y - point.y) <= radius*radius);
+    }
+
+    public void removeNode(char label) {
+        if (root != null && label == root.label) {
+            Log.e(TAG, "Trying to remove node");
+        }
+        Stack<Node> nodeStack = new Stack<>();
+        nodeStack.push(root);
+
+        while (!nodeStack.empty()) {
+
+            // Pop the top item from stack and print it
+            Node cur = nodeStack.peek();
+            nodeStack.pop();
+
+            // Push right and left children of the popped node to stack
+            if (cur.right != null) {
+                if (cur.right.label == label) {
+                    cur.right = null;
+                    return;
+                }
+                nodeStack.push(cur.right);
+            }
+            if (cur.left != null) {
+                if (cur.left.label == label) {
+                    cur.left = null;
+                    return;
+                }
+                nodeStack.push(cur.left);
+            }
+        }
+    }
+
+    public void deselectNodes() {
+        Stack<Node> nodeStack = new Stack<>();
+        nodeStack.push(root);
+
+        while (!nodeStack.empty()) {
+
+            // Pop the top item from stack and print it
+            Node cur = nodeStack.peek();
+            nodeStack.pop();
+            cur.setSelected(false);
+
+            // Push right and left children of the popped node to stack
+            if (cur.right != null) {
+                nodeStack.push(cur.right);
+            }
+            if (cur.left != null) {
+                nodeStack.push(cur.left);
+            }
+        }
+    }
+
+    public void removePrompts() {
+        Stack<Node> nodeStack = new Stack<>();
+        nodeStack.push(root);
+
+        while (!nodeStack.empty()) {
+
+            // Pop the top item from stack and print it
+            Node cur = nodeStack.peek();
+            nodeStack.pop();
+
+            // Push right and left children of the popped node to stack
+            if (cur.right != null) {
+                if (cur.right.isPrompt()) {
+                    cur.right = null;
+                } else {
+                    nodeStack.push(cur.right);
+                }
+            }
+            if (cur.left != null) {
+                if (cur.left.isPrompt()) {
+                    cur.left = null;
+                } else {
+                    nodeStack.push(cur.left);
+                }
+            }
+        }
     }
 }

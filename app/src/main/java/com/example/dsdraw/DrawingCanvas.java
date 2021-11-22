@@ -10,6 +10,7 @@ import android.view.View;
 
 import com.example.dsdraw.structures.BinaryTree;
 import com.example.dsdraw.structures.CanvasPoint;
+import com.example.dsdraw.structures.Node;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -118,6 +119,8 @@ public class DrawingCanvas extends View implements View.OnTouchListener {
                 org.y -= panOffset.y;
                 break;
             case TAP:
+                Log.d(TAG, "getNodeOverlappingPoint handleTap");
+                handleTap(mStrokeManager.getTapPoint());
                 break;
         }
 
@@ -185,5 +188,29 @@ public class DrawingCanvas extends View implements View.OnTouchListener {
 //            }
 //        }
 //        return true;
+    }
+
+    private void handleTap(CanvasPoint tapPoint) {
+        Node touchedNode = tree.getNodeOverlappingPoint(tapPoint);
+        if (touchedNode != null) {
+//            Toast toast = Toast.makeText(c, "Touched node: " + touchedNode.label, Toast.LENGTH_SHORT);
+//            toast.show();
+            Log.e(TAG, "Touched node tap: " + touchedNode.label);
+            if (touchedNode.isSelected()) {
+//                touchedNode = null;
+                tree.removeNode(touchedNode.label);
+                tree.removePrompts();
+            } else if (touchedNode.isPrompt()) {
+                touchedNode.setPrompt(false);
+                tree.deselectNodes();
+                tree.removePrompts();
+            } else {
+                touchedNode.setSelected(true);
+            }
+        } else {
+            Log.e(TAG, "No overlapping node found for touch. tap");
+            tree.deselectNodes();
+            tree.removePrompts();
+        }
     }
 }
