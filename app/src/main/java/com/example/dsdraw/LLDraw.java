@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.example.dsdraw.structures.CanvasPoint;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -52,6 +53,7 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
     List<Character> list2Nodes = new ArrayList<>();
     List<CanvasPoint> points = new ArrayList<>();
     List<CanvasPoint> curStroke = new ArrayList<>();
+    List<ColoredStroke> allStrokes = new ArrayList<>();
 
     Context c;
     Paint paint = new Paint();
@@ -213,14 +215,19 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
         }
         if(curStroke.size()>2) {
             for(CanvasPoint point : curStroke)
-                points.add(point);
+                canvas.drawCircle(point.x, point.y, 20, paint);
         }
-        for (CanvasPoint point : points) {
-            canvas.drawCircle(point.x, point.y, 20, paint);
+        for (ColoredStroke thisStroke : allStrokes) {
+            List<CanvasPoint> strokePoints = thisStroke.stroke;
+            Paint strokePainter = new Paint();
+            strokePainter.setColor(thisStroke.color);
+
+            for(CanvasPoint point : strokePoints) {
+                canvas.drawCircle(point.x, point.y, 20, strokePainter);
+            }
         }
         if(animate)
         {
-            Log.d("Highlight", highlightBox+"");
             if(highlightBox == numNodes){
                 highlightBox = 0;
                 animate = false;
@@ -268,6 +275,12 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
                 point.x = event.getX();
                 point.y = event.getY();
                 curStroke.add(point);
+                List<CanvasPoint> strokeInfo = new ArrayList<>();
+                for(CanvasPoint strokePoint : curStroke)
+                    strokeInfo.add(strokePoint);
+                ColoredStroke thisStroke = new ColoredStroke(strokeInfo, mDefaultColor);
+                if(strokeInfo.size()>2)
+                    allStrokes.add(thisStroke);
                 invalidate();
                 curStroke.clear();
                 break;
@@ -285,15 +298,15 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
                 if (Math.abs(startX - stopX) > THRESHOLD && Math.abs(startY - stopY) < THRESHOLD) {
                     if (startX > stopX) {
                         // Swipe left
-                        Toast toast = Toast.makeText(c, "Double Finger Left Swipe", Toast.LENGTH_SHORT);
-                        toast.show();
+                        //Toast toast = Toast.makeText(c, "Double Finger Left Swipe", Toast.LENGTH_SHORT);
+                        //toast.show();
                         numNodes = Math.max(1, numNodes-deleteNodes);
                         deleteNodes = 0;
                         invalidate();
                     } else {
                         //Swipe right
-                        Toast toast = Toast.makeText(c, "Double Finger Right Swipe", Toast.LENGTH_SHORT);
-                        toast.show();
+                        //Toast toast = Toast.makeText(c, "Double Finger Right Swipe", Toast.LENGTH_SHORT);
+                        //toast.show();
                         numNodes += addNodes;
                         addNodes = 0;
                         invalidate();
@@ -301,8 +314,8 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
                 } else if (Math.abs(startY - stopY) > THRESHOLD && Math.abs(startX - stopX) < THRESHOLD) {
                     if (startY > stopY) {
                         // Swipe up
-                        Toast toast = Toast.makeText(c, "Double Finger Up Swipe", Toast.LENGTH_SHORT);
-                        toast.show();
+                        //Toast toast = Toast.makeText(c, "Double Finger Up Swipe", Toast.LENGTH_SHORT);
+                        //toast.show();
                         points.clear();
                         invalidate();
                     } else {
