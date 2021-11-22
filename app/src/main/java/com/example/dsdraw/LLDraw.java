@@ -91,6 +91,7 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
                         onColorPicked(int color) {
                             mDefaultColor = color;
                             paint.setColor(mDefaultColor);
+                            mPickColorButton.setBackgroundColor(mDefaultColor);
                         }
                     });
             }
