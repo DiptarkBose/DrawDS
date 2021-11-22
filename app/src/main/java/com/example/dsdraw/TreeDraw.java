@@ -8,6 +8,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 
 import com.example.dsdraw.structures.BinaryTree;
@@ -15,6 +16,8 @@ import com.example.dsdraw.structures.CanvasPoint;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import top.defaults.colorpicker.ColorPickerPopup;
 
 public class TreeDraw extends RelativeLayout implements View.OnTouchListener {
     private final String TAG = "DrawingCanvas";
@@ -27,6 +30,9 @@ public class TreeDraw extends RelativeLayout implements View.OnTouchListener {
     private float stopY;
     private float stopX;
     private static final int THRESHOLD = 100;
+    public static int highlightBox, mDefaultColor;
+
+    private Button mPickColorButton;
     //    List<CanvasPoint> points = new ArrayList<>();
     Context c;
     Paint paint = new Paint();
@@ -43,10 +49,9 @@ public class TreeDraw extends RelativeLayout implements View.OnTouchListener {
     private final static int TRUE_ORIGIN_X = 500;
     private final static int TRUE_ORIGIN_Y = 300;
 
-    public TreeDraw(Context context, AttributeSet attrs) {
+    public TreeDraw(final Context context, AttributeSet attrs) {
         super(context);
-        setFocusable(true);
-        setFocusableInTouchMode(true);
+        this.setWillNotDraw(false);
         this.setOnTouchListener(this);
         inflate(context, R.layout.treedraw, this);
 
@@ -62,6 +67,33 @@ public class TreeDraw extends RelativeLayout implements View.OnTouchListener {
         mStrokeManager = new StrokeManager(TAG);
 
         drawnPoints = new ArrayList<>();
+
+        mPickColorButton = findViewById(R.id.pick_color_button);
+        mDefaultColor = 0;
+        paint.setStrokeWidth(10);
+
+        mPickColorButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                new ColorPickerPopup.Builder(context).initialColor(Color.RED)
+                        .enableBrightness(true)
+                        .enableAlpha(true)
+                        .okTitle("Choose")
+                        .cancelTitle("Cancel")
+                        .showIndicator(true)
+                        .showValue(true)
+                        .build()
+                        .show(v, new ColorPickerPopup.ColorPickerObserver() {
+                            @Override
+                            public void
+                            onColorPicked(int color) {
+                                mDefaultColor = color;
+                                paint.setColor(mDefaultColor);
+                                mPickColorButton.setBackgroundColor(mDefaultColor);
+                            }
+                        });
+            }
+        });
     }
 
     @Override
