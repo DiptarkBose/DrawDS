@@ -1,84 +1,37 @@
 package com.example.dsdraw;
 
-        import androidx.appcompat.app.AppCompatActivity;
-        import me.panavtec.drawableview.DrawableView;
-        import me.panavtec.drawableview.DrawableViewConfig;
+import androidx.appcompat.app.AppCompatActivity;
 
-        import android.graphics.Color;
-        import android.os.Bundle;
-        import android.view.Display;
-        import android.view.MotionEvent;
-        import android.view.View;
-        import android.widget.Button;
-        import android.widget.NumberPicker;
-        import android.widget.Toast;
-
-        import java.util.ArrayList;
-        import java.util.List;
-        import java.util.Random;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity {
 
+    Button llCanvas, treeCanvas;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        llCanvas = (Button) findViewById(R.id.ll_canvas);
+        treeCanvas = (Button) findViewById(R.id.tree_canvas);
+
+        llCanvas.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(v.getContext(), LLActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        treeCanvas.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(v.getContext(), TreeActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 }
-
-// import android.content.Context;
-// import android.os.Bundle;
-// import android.view.View;
-// import android.widget.Button;
-
-// import androidx.appcompat.app.AppCompatActivity;
-
-// public class MainActivity extends AppCompatActivity {
-
-//     Button openTreeCanvas;
-//     Button openArrayCanvas;
-//     Button openLLCanvas;
-
-//     DrawingCanvas drawingCanvas;
-//     ArrayDraw arrayDraw;
-//     LLDraw llDraw;
-
-//     Context mContext;
-
-//     @Override
-//     protected void onCreate(Bundle savedInstanceState) {
-//         super.onCreate(savedInstanceState);
-//         mContext = this;
-//         this.setContentView(R.layout.activity_main);
-
-//         openTreeCanvas = this.findViewById(R.id.treeCanvasButton);
-//         openTreeCanvas.setOnClickListener(new View.OnClickListener() {
-//             @Override
-//             public void onClick(View view) {
-//                 drawingCanvas = new DrawingCanvas(mContext);
-//                 setContentView(drawingCanvas);
-//                 drawingCanvas.requestFocus();
-//             }
-//         });
-
-//         openArrayCanvas = this.findViewById(R.id.arrayCanvasButton);
-//         openArrayCanvas.setOnClickListener(new View.OnClickListener() {
-//             @Override
-//             public void onClick(View view) {
-//                 arrayDraw = new ArrayDraw(mContext);
-//                 setContentView(arrayDraw);
-//                 arrayDraw.requestFocus();
-//             }
-//         });
-
-//         openLLCanvas = this.findViewById(R.id.llCanvasButton);
-//         openLLCanvas.setOnClickListener(new View.OnClickListener() {
-//             @Override
-//             public void onClick(View view) {
-//                 llDraw = new LLDraw(mContext);
-//                 setContentView(llDraw);
-//                 llDraw.requestFocus();
-//             }
-//         });
-
-//     }

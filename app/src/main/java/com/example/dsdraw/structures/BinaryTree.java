@@ -10,12 +10,39 @@ public class BinaryTree
     private static final String TAG = "BinaryTree";
     public Node root;
 
-    public final static int TREE_X_OFFSET = 100;
-    public final static int TREE_Y_OFFSET = 100;
-    public final static int TREE_NODE_RADIUS = 50;
-    public final static float TREE_NODE_FONT_SIZE = 48f;
+    private static float mScalingFactor = 1.0F;
 
-    BinaryTree(char ch)
+    public static void setScalingFactor(float mScalingFactor) {
+        BinaryTree.mScalingFactor = mScalingFactor;
+        Log.d(TAG, "tryDetectZoom setScalingFactor:" + mScalingFactor);
+    }
+
+    public static float getScalingFactor() {
+        return mScalingFactor;
+    }
+
+    private static final int TREE_X_OFFSET = 100;
+    private static final int TREE_Y_OFFSET = 100;
+    private static final int TREE_NODE_RADIUS = 50;
+    private static final float TREE_NODE_FONT_SIZE = 48f;
+
+    public static int getTreeXOffset() {
+        return (int) (TREE_X_OFFSET * mScalingFactor);
+    }
+
+    public static int getTreeYOffset() {
+        return (int) (TREE_Y_OFFSET * mScalingFactor);
+    }
+
+    public static int getTreeNodeRadius() {
+        return (int) (TREE_NODE_RADIUS * mScalingFactor);
+    }
+
+    public static float getTreeNodeFontSize() {
+        return TREE_NODE_FONT_SIZE * mScalingFactor;
+    }
+
+    public BinaryTree(char ch)
     {
         root = new Node(ch);
     }
@@ -45,7 +72,7 @@ public class BinaryTree
             Node cur = nodeStack.peek();
             CanvasPoint pnt = cur.getPoint();
 
-            if(isPointInCircle(pnt, touchPoint, TREE_NODE_RADIUS)) {
+            if(isPointInCircle(pnt, touchPoint, getTreeNodeRadius())) {
                 return cur;
             }
 

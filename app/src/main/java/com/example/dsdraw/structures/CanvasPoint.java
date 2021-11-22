@@ -7,4 +7,8 @@ public class CanvasPoint {
         x = _x;
         y = _y;
     }
+    public CanvasPoint(CanvasPoint p){
+        x = p.x;
+        y = p.y;
+    }
 }
