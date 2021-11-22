@@ -75,6 +75,7 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
 
         mPickColorButton = findViewById(R.id.pick_color_button);
         mDefaultColor = 0;
+        paint.setStrokeWidth(10);
 
         mPickColorButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -214,16 +215,18 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
             }
         }
         if(curStroke.size()>2) {
-            for(CanvasPoint point : curStroke)
-                canvas.drawCircle(point.x, point.y, 20, paint);
+            for (int i = 0; i < curStroke.size() - 2; i++) {
+                canvas.drawLine(curStroke.get(i).x, curStroke.get(i).y, curStroke.get(i+1).x, curStroke.get(i+1).y, paint);
+            }
         }
         for (ColoredStroke thisStroke : allStrokes) {
             List<CanvasPoint> strokePoints = thisStroke.stroke;
             Paint strokePainter = new Paint();
             strokePainter.setColor(thisStroke.color);
+            strokePainter.setStrokeWidth(10);
 
-            for(CanvasPoint point : strokePoints) {
-                canvas.drawCircle(point.x, point.y, 20, strokePainter);
+            for (int i = 0; i < strokePoints.size() - 2; i++) {
+                canvas.drawLine(strokePoints.get(i).x, strokePoints.get(i).y, strokePoints.get(i+1).x, strokePoints.get(i+1).y, strokePainter);
             }
         }
         if(animate)
