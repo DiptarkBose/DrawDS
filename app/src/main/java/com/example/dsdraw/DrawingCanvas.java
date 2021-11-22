@@ -7,11 +7,9 @@ import android.graphics.Paint;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 
 import com.example.dsdraw.structures.BinaryTree;
 import com.example.dsdraw.structures.CanvasPoint;
-import com.example.dsdraw.structures.Node;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +38,9 @@ public class DrawingCanvas extends View implements View.OnTouchListener {
 
     List<List<CanvasPoint>> drawnPoints;
 
+    private final static int TRUE_ORIGIN_X = 500;
+    private final static int TRUE_ORIGIN_Y = 300;
+
     public DrawingCanvas(Context context) {
         super(context);
         setFocusable(true);
@@ -48,7 +49,7 @@ public class DrawingCanvas extends View implements View.OnTouchListener {
         paint.setColor(Color.BLACK);
         c = context;
         tree = BinaryTree.getBasicTree();
-        org = new CanvasPoint(300,300);
+        org = new CanvasPoint(TRUE_ORIGIN_X,TRUE_ORIGIN_Y);
 
         mDrawingManager = new DrawingManager();
         mStrokeManager = new StrokeManager(TAG);
@@ -93,14 +94,19 @@ public class DrawingCanvas extends View implements View.OnTouchListener {
             case TBD:
                 break;
             case ZOOM_IN:
-                BinaryTree.setScalingFactor((float) mStrokeManager.getmZoomFactor());
+                BinaryTree.setScalingFactor((float) mStrokeManager.getZoomFactor());
 //                Log.d(TAG, "tryDetectZoom onTouch zoom_in");
                 break;
             case ZOOM_OUT:
-                BinaryTree.setScalingFactor((float) mStrokeManager.getmZoomFactor());
+                BinaryTree.setScalingFactor((float) mStrokeManager.getZoomFactor());
 //                Log.d(TAG, "tryDetectZoom onTouch zoom_out");
                 break;
             case PAN:
+                CanvasPoint panOffset = mStrokeManager.getPanOffset();
+//                org.x = TRUE_ORIGIN_X - panOffset.x;
+//                org.y = TRUE_ORIGIN_Y - panOffset.y;
+                org.x -= panOffset.x;
+                org.y -= panOffset.y;
                 break;
             case TAP:
                 break;

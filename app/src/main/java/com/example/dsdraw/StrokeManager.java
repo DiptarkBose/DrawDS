@@ -35,7 +35,6 @@ public class StrokeManager {
     private final double MIN_ZOOM = 0.5;
 
     private double mZoomFactor;
-    private CanvasPoint mPanOffset;
     private CanvasPoint mTapPoint;
 
     public StrokeManager(String tag){
@@ -51,7 +50,6 @@ public class StrokeManager {
         }
 
         mZoomFactor = 1.0;
-        mPanOffset = new CanvasPoint(0, 0);
         mTapPoint = new CanvasPoint(0, 0);
     }
 
@@ -59,8 +57,24 @@ public class StrokeManager {
         return mStrokeType;
     }
 
-    public double getmZoomFactor() {
+    public double getZoomFactor() {
         return mZoomFactor;
+    }
+
+    public CanvasPoint getPanOffset() {
+        if (mMultiStrokeStore.getStrokeForFinger(2).size() > 1) {
+            float xOff = mMultiStrokeStore.getStrokeForFinger(2).get(mMultiStrokeStore.getStrokeForFinger(2).size() - 2).x -
+                    mMultiStrokeStore.getStrokeForFinger(2).get(mMultiStrokeStore.getStrokeForFinger(2).size() - 1).x;
+            float yOff = mMultiStrokeStore.getStrokeForFinger(2).get(mMultiStrokeStore.getStrokeForFinger(2).size() - 2).y -
+                    mMultiStrokeStore.getStrokeForFinger(2).get(mMultiStrokeStore.getStrokeForFinger(2).size() - 1).y;
+            return new CanvasPoint(xOff, yOff);
+        }
+//        float xOff = mMultiStrokeStore.getStrokeForFinger(2).get(0).x -
+//                mMultiStrokeStore.getStrokeForFinger(2).get(mMultiStrokeStore.getStrokeForFinger(2).size() - 1).x;
+//        float yOff = mMultiStrokeStore.getStrokeForFinger(2).get(0).y -
+//                mMultiStrokeStore.getStrokeForFinger(2).get(mMultiStrokeStore.getStrokeForFinger(2).size() - 1).y;
+//        return new CanvasPoint(xOff, yOff);
+        return new CanvasPoint(0,0);
     }
 
     private void printStrokeData() {
@@ -88,8 +102,6 @@ public class StrokeManager {
     private void resetParamsForStrokeStart() {
         mStrokeType = StrokeType.TBD;
 //        mZoomFactor = 1.0;
-        mPanOffset.x = 0;
-        mPanOffset.y = 0;
         mTapPoint.x = 0;
         mTapPoint.y = 0;
     }
@@ -151,11 +163,8 @@ public class StrokeManager {
         if (mMultiStrokeStore.getCurrentActiveFingers() == 3
                 && strokeDirections.get(2) != LineDirection.TOUCH
                 && strokeDirections.get(2) != LineDirection.NONE) {
-            float xOff = mMultiStrokeStore.getStrokeForFinger(2).get(0).x -
-                    mMultiStrokeStore.getStrokeForFinger(2).get(mMultiStrokeStore.getStrokeForFinger(2).size() - 1).x;
-            float yOff = mMultiStrokeStore.getStrokeForFinger(2).get(0).y -
-                    mMultiStrokeStore.getStrokeForFinger(2).get(mMultiStrokeStore.getStrokeForFinger(2).size() - 1).y;
-            Log.d(TAG, "Pan detected xoff:" + xOff + ";yOff:" + yOff);
+
+            Log.d(TAG, "tryDetectPan Pan detected");
             mStrokeType = StrokeType.PAN;
         }
     }
