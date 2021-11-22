@@ -319,7 +319,8 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
                         // Swipe up
                         //Toast toast = Toast.makeText(c, "Double Finger Up Swipe", Toast.LENGTH_SHORT);
                         //toast.show();
-                        points.clear();
+                        if(allStrokes.size()>0)
+                            allStrokes.remove(allStrokes.size()-1);
                         invalidate();
                     } else {
                         //Swipe down
