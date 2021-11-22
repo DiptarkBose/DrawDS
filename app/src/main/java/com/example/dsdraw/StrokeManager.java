@@ -18,12 +18,25 @@ public class StrokeManager {
     private final int TOUCH_THRESHOLD = 10;
     private final int TOUCH_POINTS_THRESHOLD = 5;
 
-    public enum LineDirection {
+    private enum LineDirection {
         U, D, L, R, UR, DR, UL, DL, NONE, TOUCH
+    }
+
+    public enum StrokeType {
+        TBD, ZOOM_IN, ZOOM_OUT, PAN, TAP
     }
 
     private List<LineDirection> strokeDirections;
     private List<Integer> strokeLengths;
+
+    private StrokeType mStrokeType = StrokeType.TBD;
+
+    private final double MAX_ZOOM = 1.5;
+    private final double MIN_ZOOM = 0.5;
+
+    private double mZoomFactor;
+    private CanvasPoint mPanOffset;
+    private CanvasPoint mTapPoint;
 
     public StrokeManager(String tag){
         TAG = "SM_" + tag;
@@ -36,6 +49,18 @@ public class StrokeManager {
             strokeDirections.add(LineDirection.NONE);
             strokeLengths.add(0);
         }
+
+        mZoomFactor = 1.0;
+        mPanOffset = new CanvasPoint(0, 0);
+        mTapPoint = new CanvasPoint(0, 0);
+    }
+
+    public StrokeType getStrokeType() {
+        return mStrokeType;
+    }
+
+    public double getmZoomFactor() {
+        return mZoomFactor;
     }
 
     private void printStrokeData() {
@@ -60,10 +85,20 @@ public class StrokeManager {
         printStrokeData();
     }
 
+    private void resetParamsForStrokeStart() {
+        mStrokeType = StrokeType.TBD;
+//        mZoomFactor = 1.0;
+        mPanOffset.x = 0;
+        mPanOffset.y = 0;
+        mTapPoint.x = 0;
+        mTapPoint.y = 0;
+    }
+
     public void onTouch(MotionEvent event) {
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
 
             case MotionEvent.ACTION_DOWN:
+                resetParamsForStrokeStart();
                 mMultiStrokeStore.beginStroke();
                 mMultiStrokeStore.addTouchPoints(event);
                 strokeDirections.set(0, LineDirection.TOUCH);
@@ -72,6 +107,9 @@ public class StrokeManager {
             case MotionEvent.ACTION_UP:
                 mMultiStrokeStore.addTouchPoints(event);
                 updateStrokeDirections();
+                if (mStrokeType == StrokeType.TBD) {
+                    tryDetectTap();
+                }
                 mMultiStrokeStore.endStroke();
                 break;
 
@@ -94,8 +132,19 @@ public class StrokeManager {
                 updateStrokeDirections();
                 break;
         }
-        tryDetectZoom();
-        tryDetectPan();
+        if (mStrokeType == StrokeType.TBD) {
+            tryDetectZoom();
+        }
+        if (mStrokeType == StrokeType.TBD) {
+            tryDetectPan();
+        }
+    }
+
+    private void tryDetectTap() {
+        if (mMultiStrokeStore.getMaxActiveFingers() == 1 && strokeDirections.get(0) == LineDirection.TOUCH) {
+            Log.d(TAG, "tryDetectTap detected tap");
+            mStrokeType = StrokeType.TAP;
+        }
     }
 
     private void tryDetectPan() {
@@ -107,6 +156,7 @@ public class StrokeManager {
             float yOff = mMultiStrokeStore.getStrokeForFinger(2).get(0).y -
                     mMultiStrokeStore.getStrokeForFinger(2).get(mMultiStrokeStore.getStrokeForFinger(2).size() - 1).y;
             Log.d(TAG, "Pan detected xoff:" + xOff + ";yOff:" + yOff);
+            mStrokeType = StrokeType.PAN;
         }
     }
 
@@ -126,7 +176,7 @@ public class StrokeManager {
         }
     }
 
-    private boolean tryDetectZoom() {
+    private void tryDetectZoom() {
         if (mMultiStrokeStore.getCurrentActiveFingers() == 2) {
             if (mappingLineDirections(strokeDirections.get(0)) == -mappingLineDirections(strokeDirections.get(1))) {
                 int startDist = MultiStrokeStore.calcMag(mMultiStrokeStore.getStrokeForFinger(0).get(0),
@@ -134,13 +184,18 @@ public class StrokeManager {
                 int endDist = MultiStrokeStore.calcMag(mMultiStrokeStore.getStrokeForFinger(0).get(mMultiStrokeStore.getStrokeForFinger(0).size() - 1),
                         mMultiStrokeStore.getStrokeForFinger(1).get(mMultiStrokeStore.getStrokeForFinger(1).size() - 1));
                 if (startDist > endDist) {
-                    Log.d(TAG, "tryDetectZoom found zoom in");
-                } else {
                     Log.d(TAG, "tryDetectZoom found zoom out");
+                    mStrokeType = StrokeType.ZOOM_OUT;
+                    mZoomFactor -= 0.5;
+                    mZoomFactor = Math.max(mZoomFactor, MIN_ZOOM);
+                } else {
+                    Log.d(TAG, "tryDetectZoom found zoom in");
+                    mStrokeType = StrokeType.ZOOM_IN;
+                    mZoomFactor += 0.5;
+                    mZoomFactor = Math.min(mZoomFactor, MAX_ZOOM);
                 }
             }
         }
-        return false;
     }
 
     private int approxSlope (double absSlope) {
@@ -212,6 +267,14 @@ public class StrokeManager {
                 canvas.drawCircle(point.x, point.y, 20, paints.get(i));
                 Log.d(TAG, "drawStrokes drawing point for finger " + i + " at x=" + point.x + ":y=" + point.y);
             }
+        }
+    }
+
+    public List<CanvasPoint> getCurrentStroke() {
+        if (mMultiStrokeStore.getMaxActiveFingers() == 1 && strokeDirections.get(0) != LineDirection.TOUCH) {
+            return mMultiStrokeStore.getStrokeForFinger(0);
+        } else {
+            return new ArrayList<>();
         }
     }
 }

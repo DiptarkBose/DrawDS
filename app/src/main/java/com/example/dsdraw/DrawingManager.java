@@ -21,11 +21,11 @@ class DrawingManager {
         mTreePaint = new Paint();
         mTreePaint.setStyle(Paint.Style.STROKE);
         mTreePaint.setColor(Color.BLACK);
-        mTreePaint.setTextSize(TREE_NODE_FONT_SIZE);
     }
 
     public void drawTree(Canvas canvas, BinaryTree tree, CanvasPoint origin) {
         Log.d(TAG, "drawTree");
+        mTreePaint.setTextSize(getTreeNodeFontSize());
         Stack<Node> nodeStack = new Stack<>();
         Stack<CanvasPoint> pointStack = new Stack<>();
         nodeStack.push(tree.root);
@@ -38,7 +38,7 @@ class DrawingManager {
             CanvasPoint pnt = pointStack.peek();
             cur.setPoint(pnt);
 
-            canvas.drawCircle(pnt.x, pnt.y, TREE_NODE_RADIUS, mTreePaint);
+            canvas.drawCircle(pnt.x, pnt.y, getTreeNodeRadius(), mTreePaint);
             canvas.drawText(String.valueOf(cur.label), pnt.x, pnt.y, mTreePaint);
 
             Log.d(TAG, "Drawing node: " + cur.label + " " + pnt.x + ":" + pnt.y);
@@ -46,16 +46,18 @@ class DrawingManager {
             nodeStack.pop();
             pointStack.pop();
 
+//            Log.d(TAG, "tryDetectZoom TREE_X_OFFSET:" + getTreeXOffset());
+
             // Push right and left children of the popped node to stack
             if (cur.right != null) {
                 nodeStack.push(cur.right);
-                pointStack.push(new CanvasPoint(pnt.x + TREE_X_OFFSET, pnt.y + TREE_Y_OFFSET));
-                canvas.drawLine(pnt.x, pnt.y, pnt.x + TREE_X_OFFSET, pnt.y + TREE_Y_OFFSET, mTreePaint);
+                pointStack.push(new CanvasPoint(pnt.x + getTreeXOffset(), pnt.y + getTreeYOffset()));
+                canvas.drawLine(pnt.x, pnt.y, pnt.x + getTreeXOffset(), pnt.y + getTreeYOffset(), mTreePaint);
             }
             if (cur.left != null) {
                 nodeStack.push(cur.left);
-                pointStack.push(new CanvasPoint(pnt.x - TREE_X_OFFSET, pnt.y + TREE_Y_OFFSET));
-                canvas.drawLine(pnt.x, pnt.y, pnt.x - TREE_X_OFFSET, pnt.y + TREE_Y_OFFSET, mTreePaint);
+                pointStack.push(new CanvasPoint(pnt.x - getTreeXOffset(), pnt.y + getTreeYOffset()));
+                canvas.drawLine(pnt.x, pnt.y, pnt.x - getTreeXOffset(), pnt.y + getTreeYOffset(), mTreePaint);
             }
         }
     }

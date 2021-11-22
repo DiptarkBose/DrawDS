@@ -27,7 +27,7 @@ public class DrawingCanvas extends View implements View.OnTouchListener {
     private float stopY;
     private float stopX;
     private static final int THRESHOLD = 100;
-    List<CanvasPoint> points = new ArrayList<>();
+//    List<CanvasPoint> points = new ArrayList<>();
     Context c;
     Paint paint = new Paint();
 
@@ -37,6 +37,8 @@ public class DrawingCanvas extends View implements View.OnTouchListener {
     CanvasPoint org;
 
     StrokeManager mStrokeManager;
+
+    List<List<CanvasPoint>> drawnPoints;
 
     public DrawingCanvas(Context context) {
         super(context);
@@ -50,24 +52,61 @@ public class DrawingCanvas extends View implements View.OnTouchListener {
 
         mDrawingManager = new DrawingManager();
         mStrokeManager = new StrokeManager(TAG);
+
+        drawnPoints = new ArrayList<>();
     }
 
     @Override
     public void onDraw(Canvas canvas) {
-//        for (CanvasPoint point : points) {
-//            canvas.drawCircle(point.x, point.y, 20, paint);
-//        }
+        Log.d(TAG, "onDraw drawnPoints size = " + drawnPoints.size());
+        for(List<CanvasPoint> points : drawnPoints) {
+            for (CanvasPoint point : points) {
+                canvas.drawCircle(point.x, point.y, 20, paint);
+            }
+        }
+        //Draw current stroke
+        for (CanvasPoint point : mStrokeManager.getCurrentStroke()) {
+            canvas.drawCircle(point.x, point.y, 20, paint);
+        }
         mDrawingManager.drawTree(canvas, tree, org);
-        mStrokeManager.drawStrokes(canvas);
+//        mStrokeManager.drawStrokes(canvas);
     }
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        if((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_POINTER_UP
-                || (event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_UP) {
-            invalidate();
+//        if((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_POINTER_UP
+//                || (event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_UP) {
+//            invalidate();
+//        }
+        if ((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_UP) {
+            if (mStrokeManager.getCurrentStroke().size() > 0) {
+                drawnPoints.add(new ArrayList<CanvasPoint>(mStrokeManager.getCurrentStroke()));
+                Log.d(TAG, "drawn stroke added true new size:" + drawnPoints.size());
+            } else {
+                Log.d(TAG, "drawn stroke added false old size:"  + drawnPoints.size());
+            }
         }
         mStrokeManager.onTouch(event);
+
+        switch (mStrokeManager.getStrokeType()) {
+
+            case TBD:
+                break;
+            case ZOOM_IN:
+                BinaryTree.setScalingFactor((float) mStrokeManager.getmZoomFactor());
+//                Log.d(TAG, "tryDetectZoom onTouch zoom_in");
+                break;
+            case ZOOM_OUT:
+                BinaryTree.setScalingFactor((float) mStrokeManager.getmZoomFactor());
+//                Log.d(TAG, "tryDetectZoom onTouch zoom_out");
+                break;
+            case PAN:
+                break;
+            case TAP:
+                break;
+        }
+
+        invalidate();
         return true;
 //        int numPointers = event.getPointerCount();
 //        if (numPointers == 1) {
