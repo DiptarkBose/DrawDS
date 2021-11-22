@@ -22,6 +22,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.example.dsdraw.structures.CanvasPoint;
+import com.example.dsdraw.ColoredStroke;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
