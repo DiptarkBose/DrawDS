@@ -14,7 +14,7 @@
         android:text="Animate Traversal" />
 
     <View
-        android:layout_height="170dp"
+        android:layout_height="150dp"
         android:layout_width="match_parent"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
@@ -58,17 +58,4 @@
             android:text="Add Right Child" />
     </LinearLayout>
 
-
-
-    <TextView
-        android:text="Quick Operations"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="150dp"
-        android:layout_centerHorizontal="true"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold"
-        android:textSize="15dp"
-        />
 </RelativeLayout>
