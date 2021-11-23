@@ -11,6 +11,7 @@ import android.graphics.Path;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.speech.tts.TextToSpeech;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -27,6 +28,7 @@ import com.example.dsdraw.ColoredStroke;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -47,6 +49,7 @@ public class ArrayDraw extends RelativeLayout implements View.OnTouchListener {
     public static int deleteNodes = 0;
     public static boolean animate = false;
     public static int highlightBox, mDefaultColor;
+    public TextToSpeech t1;
 
     private Button mPickColorButton;
 
@@ -137,6 +140,15 @@ public class ArrayDraw extends RelativeLayout implements View.OnTouchListener {
                 hx1 = 100+(100*highlightBox);
                 hx2 = hx1+100; hy1 = 200; hy2 = 300;
                 invalidate();
+            }
+        });
+
+        t1=new TextToSpeech(context, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if(status != TextToSpeech.ERROR) {
+                    t1.setLanguage(Locale.UK);
+                }
             }
         });
     }
@@ -241,6 +253,7 @@ public class ArrayDraw extends RelativeLayout implements View.OnTouchListener {
                 }
                 hx1 += 100; hx2 = hx1+100;
                 invalidate();
+                t1.speak(list1Nodes.get(highlightBox-1)+"", TextToSpeech.QUEUE_FLUSH, null);
             }
         }
     }
