@@ -319,7 +319,8 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
                 List<CanvasPoint> strokeInfo = new ArrayList<>();
                 for(CanvasPoint strokePoint : curStroke)
                     strokeInfo.add(strokePoint);
-                ColoredStroke thisStroke = new ColoredStroke(strokeInfo, mDefaultColor);
+                int color = (mDefaultColor==0? Color.BLACK : mDefaultColor);
+                ColoredStroke thisStroke = new ColoredStroke(strokeInfo, color);
                 if(strokeInfo.size()>2)
                     allStrokes.add(thisStroke);
                 invalidate();
