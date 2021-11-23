@@ -3,15 +3,18 @@ package com.example.dsdraw;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.util.Log;
 
 import com.example.dsdraw.structures.BinaryTree;
 import com.example.dsdraw.structures.CanvasPoint;
+import com.example.dsdraw.structures.Graph;
+import com.example.dsdraw.structures.GraphNode;
 import com.example.dsdraw.structures.Node;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
-
-import static com.example.dsdraw.structures.BinaryTree.*;
 
 class DrawingManager {
     private final String TAG = "DrawingManager";
@@ -38,9 +41,9 @@ class DrawingManager {
         Log.d(TAG, "drawTree");
 
         //updated here to handle zoom
-        mTreePaint.setTextSize(getTreeNodeFontSize());
-        mNodeSelectedPaint.setTextSize(getTreeNodeFontSize());
-        mNodePromptPaint.setTextSize(getTreeNodeFontSize());
+        mTreePaint.setTextSize(BinaryTree.getTreeNodeFontSize());
+        mNodeSelectedPaint.setTextSize(BinaryTree.getTreeNodeFontSize());
+        mNodePromptPaint.setTextSize(BinaryTree.getTreeNodeFontSize());
 
         Stack<Node> nodeStack = new Stack<>();
         Stack<CanvasPoint> pointStack = new Stack<>();
@@ -69,27 +72,27 @@ class DrawingManager {
 
 //            Log.d(TAG, "tryDetectZoom TREE_X_OFFSET:" + getTreeXOffset());
             int level = binlog(cur.label - 'A' + 1);
-            int disp = Math.min(getTreeXOffset()/2, getTreeNodeRadius() * (level - 1));
+            int disp = Math.min(BinaryTree.getTreeXOffset()/2, BinaryTree.getTreeNodeRadius() * (level - 1));
 
             Log.d(TAG, "Level calc for label:" + cur.label + ":" + level + ":disp=" + disp);
 
             // Push right and left children of the popped node to stack
             if (cur.right != null) {
                 nodeStack.push(cur.right);
-                CanvasPoint cp = new CanvasPoint(pnt.x + getTreeXOffset() - disp, pnt.y + getTreeYOffset());
+                CanvasPoint cp = new CanvasPoint(pnt.x + BinaryTree.getTreeXOffset() - disp, pnt.y + BinaryTree.getTreeYOffset());
                 pointStack.push(cp);
                 canvas.drawLine(pnt.x, pnt.y, cp.x, cp.y, mTreePaint);
             }
             if (cur.left != null) {
                 nodeStack.push(cur.left);
-                CanvasPoint cp = new CanvasPoint(pnt.x - getTreeXOffset() + disp, pnt.y + getTreeYOffset());
+                CanvasPoint cp = new CanvasPoint(pnt.x - BinaryTree.getTreeXOffset() + disp, pnt.y + BinaryTree.getTreeYOffset());
                 pointStack.push(cp);
                 canvas.drawLine(pnt.x, pnt.y, cp.x, cp.y, mTreePaint);
             }
 
-            canvas.drawCircle(pnt.x, pnt.y, getTreeNodeRadius(), mWhitePaint);
-            canvas.drawCircle(pnt.x, pnt.y, getTreeNodeRadius(), selectedPaint);
-            canvas.drawText(String.valueOf(cur.label), pnt.x - getTreeNodeRadius() / 3, pnt.y + getTreeNodeRadius() / 3, selectedPaint);
+            canvas.drawCircle(pnt.x, pnt.y, BinaryTree.getTreeNodeRadius(), mWhitePaint);
+            canvas.drawCircle(pnt.x, pnt.y, BinaryTree.getTreeNodeRadius(), selectedPaint);
+            canvas.drawText(String.valueOf(cur.label), pnt.x - BinaryTree.getTreeNodeRadius() / 3, pnt.y + BinaryTree.getTreeNodeRadius() / 3, selectedPaint);
 
         }
     }
@@ -102,5 +105,72 @@ class DrawingManager {
         if( bits >= 16  ) { bits >>>= 4; log += 4; }
         if( bits >= 4   ) { bits >>>= 2; log += 2; }
         return log + ( bits >>> 1 );
+    }
+
+    public void drawGraph(Canvas canvas, Graph graph, CanvasPoint org) {
+        Log.d(TAG, "drawTree");
+
+        //updated here to handle zoom
+        mTreePaint.setTextSize(Graph.getTreeNodeFontSize());
+        mNodeSelectedPaint.setTextSize(Graph.getTreeNodeFontSize());
+        mNodePromptPaint.setTextSize(Graph.getTreeNodeFontSize());
+
+        Map<Character, Boolean> visited = new HashMap<>();
+
+        for (GraphNode cur : graph.nodes) {
+
+            // Pop the top item from stack and print it
+            CanvasPoint pnt = cur.getPoint();
+//            cur.setPoint(pnt);
+            if (pnt == null) {
+                continue;
+            }
+
+            visited.put(cur.label, true);
+
+            Paint selectedPaint = mTreePaint;
+            if (cur.isPrompt()) {
+                selectedPaint = mNodePromptPaint;
+            } else if(cur.isSelected()) {
+                selectedPaint = mNodeSelectedPaint;
+            }
+
+            Log.d(TAG, "Drawing node: " + cur.label + " " + pnt.x + ":" + pnt.y);
+
+            for (GraphNode neb : cur.nebs) {
+                if (neb != null && !visited.containsKey(neb.label)) {
+                    CanvasPoint np = neb.getPoint();
+                    canvas.drawLine(pnt.x, pnt.y, np.x, np.y, mTreePaint);
+                }
+            }
+
+//            nodeStack.pop();
+//            pointStack.pop();
+
+//            Log.d(TAG, "tryDetectZoom TREE_X_OFFSET:" + getTreeXOffset());
+//            int level = binlog(cur.label - 'A' + 1);
+//            int disp = Math.min(Graph.getTreeXOffset()/2, Graph.getTreeNodeRadius() * (level - 1));
+//
+//            Log.d(TAG, "Level calc for label:" + cur.label + ":" + level + ":disp=" + disp);
+//
+//            // Push right and left children of the popped node to stack
+//            if (cur.right != null) {
+//                nodeStack.push(cur.right);
+//                CanvasPoint cp = new CanvasPoint(pnt.x + Graph.getTreeXOffset() - disp, pnt.y + Graph.getTreeYOffset());
+//                pointStack.push(cp);
+//                canvas.drawLine(pnt.x, pnt.y, cp.x, cp.y, mTreePaint);
+//            }
+//            if (cur.left != null) {
+//                nodeStack.push(cur.left);
+//                CanvasPoint cp = new CanvasPoint(pnt.x - Graph.getTreeXOffset() + disp, pnt.y + Graph.getTreeYOffset());
+//                pointStack.push(cp);
+//                canvas.drawLine(pnt.x, pnt.y, cp.x, cp.y, mTreePaint);
+//            }
+
+            canvas.drawCircle(pnt.x, pnt.y, Graph.getTreeNodeRadius(), mWhitePaint);
+            canvas.drawCircle(pnt.x, pnt.y, Graph.getTreeNodeRadius(), selectedPaint);
+            canvas.drawText(String.valueOf(cur.label), pnt.x - Graph.getTreeNodeRadius() / 3, pnt.y + Graph.getTreeNodeRadius() / 3, selectedPaint);
+
+        }
     }
 }
