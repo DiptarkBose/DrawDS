@@ -3,6 +3,7 @@ package com.example.dsdraw;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.util.Log;
 
 import com.example.dsdraw.structures.BinaryTree;
@@ -11,6 +12,8 @@ import com.example.dsdraw.structures.Graph;
 import com.example.dsdraw.structures.GraphNode;
 import com.example.dsdraw.structures.Node;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 
 class DrawingManager {
@@ -112,6 +115,8 @@ class DrawingManager {
         mNodeSelectedPaint.setTextSize(Graph.getTreeNodeFontSize());
         mNodePromptPaint.setTextSize(Graph.getTreeNodeFontSize());
 
+        Map<Character, Boolean> visited = new HashMap<>();
+
         for (GraphNode cur : graph.nodes) {
 
             // Pop the top item from stack and print it
@@ -121,6 +126,8 @@ class DrawingManager {
                 continue;
             }
 
+            visited.put(cur.label, true);
+
             Paint selectedPaint = mTreePaint;
             if (cur.isPrompt()) {
                 selectedPaint = mNodePromptPaint;
@@ -129,6 +136,13 @@ class DrawingManager {
             }
 
             Log.d(TAG, "Drawing node: " + cur.label + " " + pnt.x + ":" + pnt.y);
+
+            for (GraphNode neb : cur.nebs) {
+                if (neb != null && !visited.containsKey(neb.label)) {
+                    CanvasPoint np = neb.getPoint();
+                    canvas.drawLine(pnt.x, pnt.y, np.x, np.y, mTreePaint);
+                }
+            }
 
 //            nodeStack.pop();
 //            pointStack.pop();

@@ -55,41 +55,7 @@ public class Graph
         nodes.add(root);
     }
 
-//    public static BinaryTree getBasicTree() {
-//        BinaryTree tree = new BinaryTree();
-//        tree.root = new Node('A');
-//        tree.root.left = new Node('B');
-//        tree.root.right = new Node('C');
-////        tree.root.right.setSelected(true);
-////        tree.root.left.left = new Node('D');
-////        tree.root.left.left.setPrompt(true);
-//        return tree;
-//    }
-
     public GraphNode getNodeOverlappingPoint(CanvasPoint touchPoint) {
-
-//        LinkedList<GraphNode> bfs = new LinkedList<>();
-//        Map<Character, Boolean> visited = new HashMap<>();
-//        bfs.add(root);
-//        visited.put(root.label, true);
-//
-//        while (bfs.size() > 0) {
-//            // Pop the top item from queue
-//            GraphNode cur = bfs.poll();
-//            if (cur != null && cur.getPoint() != null) {
-//                CanvasPoint pnt = cur.getPoint();
-//                if (isPointInCircle(pnt, touchPoint, Graph.getTreeNodeRadius())) {
-//                    return cur;
-//                }
-//                // Push unvisited children to the queue
-//                for(GraphNode gn : cur.nebs) {
-//                    if (gn != null && !visited.get(gn.label)) {
-//                        visited.put(gn.label, true);
-//                        bfs.add(gn);
-//                    }
-//                }
-//            }
-//        }
 
         for (GraphNode gn : nodes) {
             if (gn != null && isPointInCircle(gn.getPoint(), touchPoint, Graph.getTreeNodeRadius())) {
@@ -158,5 +124,39 @@ public class Graph
             }
         }
         return label;
+    }
+
+    public GraphNode getSelectedNode() {
+        for (GraphNode gn : nodes) {
+            if (gn.isSelected()) {
+                return gn;
+            }
+        }
+        return null;
+    }
+
+    public void updateOffset(float x, float y) {
+        for (GraphNode gn : nodes) {
+            if (gn != null) {
+                CanvasPoint cp = gn.getPoint();
+                cp.x -= x;
+                cp.y -= y;
+            }
+        }
+    }
+
+    public void updateDistancesFromRoot(float prevFactor, float newFactor) {
+        if (prevFactor != newFactor) {
+            float propChange = newFactor / prevFactor;
+            for (GraphNode gn : nodes) {
+                if (gn != null && gn.label != root.label) {
+                    CanvasPoint cp = gn.getPoint();
+                    Log.d(TAG, "updateDistancesFromRoot node " + gn.label + "x:" + cp.x + ",y:" + cp.y);
+                    cp.x = root.getPoint().x + (cp.x - root.getPoint().x) * propChange;
+                    cp.y = root.getPoint().y + (cp.y - root.getPoint().y) * propChange;
+                    Log.d(TAG, "updateDistancesFromRoot node " + gn.label + "x:" + cp.x + ",y:" + cp.y);
+                }
+            }
+        }
     }
 }

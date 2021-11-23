@@ -133,17 +133,17 @@ public class GraphDraw extends RelativeLayout implements View.OnTouchListener {
             case TBD:
                 break;
             case ZOOM_IN:
-                Graph.setScalingFactor((float) mStrokeManager.getZoomFactor());
-//                Log.d(TAG, "tryDetectZoom onTouch zoom_in");
-                break;
             case ZOOM_OUT:
-                Graph.setScalingFactor((float) mStrokeManager.getZoomFactor());
-//                Log.d(TAG, "tryDetectZoom onTouch zoom_out");
+                float prevFactor = Graph.getScalingFactor();
+                float newFactor = (float) mStrokeManager.getZoomFactor();
+                Graph.setScalingFactor(newFactor);
+                graph.updateDistancesFromRoot(prevFactor, newFactor);
                 break;
             case PAN:
                 CanvasPoint panOffset = mStrokeManager.getPanOffset();
                 org.x -= panOffset.x;
                 org.y -= panOffset.y;
+                graph.updateOffset(panOffset.x, panOffset.y);
                 break;
             case TAP:
                 Log.d(TAG, "getNodeOverlappingPoint handleTap");
@@ -167,9 +167,15 @@ public class GraphDraw extends RelativeLayout implements View.OnTouchListener {
                 graph.deselectNodes();
                 graph.removePrompts();
             } else {
-                graph.deselectNodes();
-                graph.removePrompts();
-                touchedNode.setSelected(true);
+                GraphNode sel = graph.getSelectedNode();
+                if (sel != null) {
+                    sel.nebs.add(touchedNode);
+                    touchedNode.nebs.add(sel);
+                    graph.deselectNodes();
+                    graph.removePrompts();
+                } else {
+                    touchedNode.setSelected(true);
+                }
             }
         } else {
             Log.e(TAG, "No overlapping node found for touch. tap");
