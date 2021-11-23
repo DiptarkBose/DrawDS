@@ -13,6 +13,7 @@ import android.widget.RelativeLayout;
 
 import com.example.dsdraw.structures.BinaryTree;
 import com.example.dsdraw.structures.CanvasPoint;
+import com.example.dsdraw.structures.Node;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,46 +21,30 @@ import java.util.List;
 import top.defaults.colorpicker.ColorPickerPopup;
 
 public class TreeDraw extends RelativeLayout implements View.OnTouchListener {
-    private final String TAG = "DrawingCanvas";
+    private final String TAG = "TreeDraw";
 
-    private static final int NONE = 0;
-    private static final int SWIPE = 1;
-    private int mode = NONE;
-    private float startY;
-    private float startX;
-    private float stopY;
-    private float stopX;
-    private static final int THRESHOLD = 100;
-    public static int highlightBox, mDefaultColor;
-
-    private Button mPickColorButton;
-    //    List<CanvasPoint> points = new ArrayList<>();
-    Context c;
     Paint paint = new Paint();
-
     DrawingManager mDrawingManager;
+    StrokeManager mStrokeManager;
 
     BinaryTree tree;
     CanvasPoint org;
-
-    StrokeManager mStrokeManager;
-
     List<List<CanvasPoint>> drawnPoints;
 
     private final static int TRUE_ORIGIN_X = 500;
     private final static int TRUE_ORIGIN_Y = 300;
 
+    public static int highlightBox, mDefaultColor;
+    private Button mPickColorButton;
+
     public TreeDraw(final Context context, AttributeSet attrs) {
         super(context);
         this.setWillNotDraw(false);
-        this.setOnTouchListener(this);
+        setOnTouchListener(this);
+
         inflate(context, R.layout.treedraw, this);
-
-        Log.d("Tree class", "Yesss");
-
         paint.setColor(Color.BLACK);
         paint.setStrokeWidth(20);
-        c = context;
         tree = BinaryTree.getBasicTree();
         org = new CanvasPoint(TRUE_ORIGIN_X,TRUE_ORIGIN_Y);
 
@@ -100,32 +85,21 @@ public class TreeDraw extends RelativeLayout implements View.OnTouchListener {
     public void onDraw(Canvas canvas) {
         Log.d(TAG, "onDraw drawnPoints size = " + drawnPoints.size());
         for(List<CanvasPoint> points : drawnPoints) {
-//            for (CanvasPoint point : points) {
-//                canvas.drawCircle(point.x, point.y, 20, paint);
-//            }
             for (int i = 0; i < points.size() - 2; i++) {
                 canvas.drawLine(points.get(i).x, points.get(i).y, points.get(i+1).x, points.get(i+1).y, paint);
             }
         }
         //Draw current stroke
-//        for (CanvasPoint point : mStrokeManager.getCurrentStroke()) {
-//            canvas.drawCircle(point.x, point.y, 20, paint);
-//        }
         List<CanvasPoint> points = mStrokeManager.getCurrentStroke();
         for (int i = 0; i < points.size() - 2; i++) {
             canvas.drawLine(points.get(i).x, points.get(i).y, points.get(i+1).x, points.get(i+1).y, paint);
         }
 
         mDrawingManager.drawTree(canvas, tree, org);
-//        mStrokeManager.drawStrokes(canvas);
     }
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-//        if((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_POINTER_UP
-//                || (event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_UP) {
-//            invalidate();
-//        }
         if ((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_UP) {
             if (mStrokeManager.getCurrentStroke().size() > 0) {
                 drawnPoints.add(new ArrayList<CanvasPoint>(mStrokeManager.getCurrentStroke()));
@@ -135,6 +109,7 @@ public class TreeDraw extends RelativeLayout implements View.OnTouchListener {
             }
         }
         mStrokeManager.onTouch(event);
+        Log.d(TAG, "tap strokemanager type = " + mStrokeManager.getStrokeType().name());
 
         switch (mStrokeManager.getStrokeType()) {
 
@@ -150,16 +125,37 @@ public class TreeDraw extends RelativeLayout implements View.OnTouchListener {
                 break;
             case PAN:
                 CanvasPoint panOffset = mStrokeManager.getPanOffset();
-//                org.x = TRUE_ORIGIN_X - panOffset.x;
-//                org.y = TRUE_ORIGIN_Y - panOffset.y;
                 org.x -= panOffset.x;
                 org.y -= panOffset.y;
                 break;
             case TAP:
+                Log.d(TAG, "getNodeOverlappingPoint handleTap");
+                handleTap(mStrokeManager.getTapPoint());
                 break;
         }
 
         invalidate();
         return true;
+    }
+
+    private void handleTap(CanvasPoint tapPoint) {
+        Node touchedNode = tree.getNodeOverlappingPoint(tapPoint);
+        if (touchedNode != null) {
+            Log.e(TAG, "Touched node tap: " + touchedNode.label);
+            if (touchedNode.isSelected()) {
+                tree.removeNode(touchedNode.label);
+                tree.removePrompts();
+            } else if (touchedNode.isPrompt()) {
+                touchedNode.setPrompt(false);
+                tree.deselectNodes();
+                tree.removePrompts();
+            } else {
+                touchedNode.setSelected(true);
+            }
+        } else {
+            Log.e(TAG, "No overlapping node found for touch. tap");
+            tree.deselectNodes();
+            tree.removePrompts();
+        }
     }
 }
