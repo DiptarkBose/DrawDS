@@ -89,7 +89,7 @@ public class MultiStrokeStore {
     }
 
     public void endStroke() {
-//        decCurrentActiveFingers();
+        decCurrentActiveFingers();
 //        clearCurrentStrokes();
     }
 
