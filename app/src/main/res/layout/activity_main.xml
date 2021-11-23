@@ -6,13 +6,30 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:layout_marginTop="20dp"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/logo"/>
+
+    <Button
+        android:id="@+id/array_canvas"
+        android:layout_height="wrap_content"
+        android:layout_width="180dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:text="Array Canvas"/>
+
     <Button
         android:id="@+id/ll_canvas"
+        android:layout_below="@id/array_canvas"
         android:layout_height="wrap_content"
         android:layout_width="170dp"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
+        android:layout_marginTop="10dp"
         android:text="Linked List Canvas"/>
+
 
     <Button
         android:id="@+id/tree_canvas"
