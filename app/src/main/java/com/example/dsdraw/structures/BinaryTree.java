@@ -22,7 +22,7 @@ public class BinaryTree
     }
 
     private static final int TREE_X_OFFSET = 100;
-    private static final int TREE_Y_OFFSET = 100;
+    private static final int TREE_Y_OFFSET = 150;
     private static final int TREE_NODE_RADIUS = 50;
     private static final float TREE_NODE_FONT_SIZE = 48f;
 

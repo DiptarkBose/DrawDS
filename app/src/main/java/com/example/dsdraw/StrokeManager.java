@@ -15,8 +15,8 @@ public class StrokeManager {
     private String TAG = "";
     private MultiStrokeStore mMultiStrokeStore;
 
-    private final int TOUCH_THRESHOLD = 10;
-    private final int TOUCH_POINTS_THRESHOLD = 5;
+    private final int TOUCH_THRESHOLD = 25;
+    private final int TOUCH_POINTS_THRESHOLD = 7;
 
     private enum LineDirection {
         U, D, L, R, UR, DR, UL, DL, NONE, TOUCH
@@ -285,7 +285,7 @@ public class StrokeManager {
     }
 
     public List<CanvasPoint> getCurrentStroke() {
-        if (mMultiStrokeStore.getMaxActiveFingers() == 1 && strokeDirections.get(0) != LineDirection.TOUCH) {
+        if (mMultiStrokeStore.getCurrentActiveFingers() > 0 && mMultiStrokeStore.getMaxActiveFingers() == 1 && strokeDirections.get(0) != LineDirection.TOUCH) {
             return mMultiStrokeStore.getStrokeForFinger(0);
         } else {
             return new ArrayList<>();

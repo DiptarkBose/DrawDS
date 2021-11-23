@@ -30,6 +30,7 @@ public class TreeDraw extends RelativeLayout implements View.OnTouchListener {
     BinaryTree tree;
     CanvasPoint org;
     List<List<CanvasPoint>> drawnPoints;
+    Button clear;
 
     private final static int TRUE_ORIGIN_X = 500;
     private final static int TRUE_ORIGIN_Y = 300;
@@ -77,6 +78,16 @@ public class TreeDraw extends RelativeLayout implements View.OnTouchListener {
                                 mPickColorButton.setBackgroundColor(mDefaultColor);
                             }
                         });
+            }
+        });
+
+        clear = (Button) findViewById(R.id.clear);
+        clear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "Clicked clear");
+                drawnPoints.clear();
+                invalidate();
             }
         });
     }
@@ -150,6 +161,8 @@ public class TreeDraw extends RelativeLayout implements View.OnTouchListener {
                 tree.deselectNodes();
                 tree.removePrompts();
             } else {
+                tree.deselectNodes();
+                tree.removePrompts();
                 touchedNode.setSelected(true);
             }
         } else {
