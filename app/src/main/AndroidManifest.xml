@@ -18,7 +18,8 @@
         </activity>
         <activity android:name=".LLActivity">
         </activity>
-        <activity android:name=".TreeActivity">
+        <activity android:name=".TreeActivity"
+            android:screenOrientation="portrait">
         </activity>
         <activity android:name=".ArrayActivity">
         </activity>
