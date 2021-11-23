@@ -190,9 +190,39 @@ public class StrokeManager {
         }
     }
 
+    private boolean isApproxOppDir(int d1, int d2) {
+        if (d1 == 0 || d2 == 0 || d1 >4 || d2 > 4) {
+            return false;
+        }
+
+        if (d1 == -d2) {
+            return true;
+        }
+        if (d1 == 1) {
+            if (d2 == -1 || d2 == -3) {
+                return true;
+            }
+        } else if (d1 == 2) {
+            if (d2 == -4 || d2 == -3) {
+                return true;
+            }
+        } else if (d1 == 3) {
+            if (d2 == -2 || d2 == -1) {
+                return true;
+            }
+        } else if (d1 == 4) {
+            if (d2 == 1 || d2 == -2) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void tryDetectZoom() {
         if (mMultiStrokeStore.getCurrentActiveFingers() == 2) {
-            if (mappingLineDirections(strokeDirections.get(0)) == -mappingLineDirections(strokeDirections.get(1))) {
+            int dir1 = mappingLineDirections(strokeDirections.get(0));
+            int dir2 = mappingLineDirections(strokeDirections.get(1));
+            if (isApproxOppDir(dir1, dir2) || isApproxOppDir(dir2, dir1)) {
                 int startDist = MultiStrokeStore.calcMag(mMultiStrokeStore.getStrokeForFinger(0).get(0),
                         mMultiStrokeStore.getStrokeForFinger(1).get(0));
                 int endDist = MultiStrokeStore.calcMag(mMultiStrokeStore.getStrokeForFinger(0).get(mMultiStrokeStore.getStrokeForFinger(0).size() - 1),
