@@ -16,7 +16,7 @@
     <Button
         android:id="@+id/array_canvas"
         android:layout_height="wrap_content"
-        android:layout_width="180dp"
+        android:layout_width="170dp"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:text="Array Canvas"/>
