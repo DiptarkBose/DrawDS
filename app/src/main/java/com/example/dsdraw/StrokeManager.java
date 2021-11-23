@@ -61,6 +61,10 @@ public class StrokeManager {
         return mZoomFactor;
     }
 
+    public CanvasPoint getTapPoint() {
+        return mTapPoint;
+    }
+
     public CanvasPoint getPanOffset() {
         if (mMultiStrokeStore.getStrokeForFinger(2).size() > 1) {
             float xOff = mMultiStrokeStore.getStrokeForFinger(2).get(mMultiStrokeStore.getStrokeForFinger(2).size() - 2).x -
@@ -120,7 +124,7 @@ public class StrokeManager {
                 mMultiStrokeStore.addTouchPoints(event);
                 updateStrokeDirections();
                 if (mStrokeType == StrokeType.TBD) {
-                    tryDetectTap();
+                    tryDetectTap(event);
                 }
                 mMultiStrokeStore.endStroke();
                 break;
@@ -152,10 +156,11 @@ public class StrokeManager {
         }
     }
 
-    private void tryDetectTap() {
+    private void tryDetectTap(MotionEvent event) {
         if (mMultiStrokeStore.getMaxActiveFingers() == 1 && strokeDirections.get(0) == LineDirection.TOUCH) {
             Log.d(TAG, "tryDetectTap detected tap");
             mStrokeType = StrokeType.TAP;
+            mTapPoint = new CanvasPoint(event.getX(), event.getY());
         }
     }
 

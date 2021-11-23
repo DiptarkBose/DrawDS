@@ -16,16 +16,27 @@ import static com.example.dsdraw.structures.BinaryTree.*;
 class DrawingManager {
     private final String TAG = "DrawingManager";
     Paint mTreePaint;
+    Paint mNodeSelectedPaint;
+    Paint mNodePromptPaint;
 
     public DrawingManager() {
         mTreePaint = new Paint();
         mTreePaint.setStyle(Paint.Style.STROKE);
         mTreePaint.setColor(Color.BLACK);
+        mNodeSelectedPaint = new Paint(mTreePaint);
+        mNodeSelectedPaint.setColor(Color.RED);
+        mNodePromptPaint = new Paint(mTreePaint);
+        mNodePromptPaint.setColor(Color.BLUE);
     }
 
     public void drawTree(Canvas canvas, BinaryTree tree, CanvasPoint origin) {
         Log.d(TAG, "drawTree");
+
+        //updated here to handle zoom
         mTreePaint.setTextSize(getTreeNodeFontSize());
+        mNodeSelectedPaint.setTextSize(getTreeNodeFontSize());
+        mNodePromptPaint.setTextSize(getTreeNodeFontSize());
+
         Stack<Node> nodeStack = new Stack<>();
         Stack<CanvasPoint> pointStack = new Stack<>();
         nodeStack.push(tree.root);
@@ -38,8 +49,15 @@ class DrawingManager {
             CanvasPoint pnt = pointStack.peek();
             cur.setPoint(pnt);
 
-            canvas.drawCircle(pnt.x, pnt.y, getTreeNodeRadius(), mTreePaint);
-            canvas.drawText(String.valueOf(cur.label), pnt.x, pnt.y, mTreePaint);
+            Paint selectedPaint = mTreePaint;
+            if (cur.isPrompt()) {
+                selectedPaint = mNodePromptPaint;
+            } else if(cur.isSelected()) {
+                selectedPaint = mNodeSelectedPaint;
+            }
+
+            canvas.drawCircle(pnt.x, pnt.y, getTreeNodeRadius(), selectedPaint);
+            canvas.drawText(String.valueOf(cur.label), pnt.x, pnt.y, selectedPaint);
 
             Log.d(TAG, "Drawing node: " + cur.label + " " + pnt.x + ":" + pnt.y);
 

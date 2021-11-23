@@ -34,5 +34,22 @@ public class Node
 
     public void setSelected(boolean selected) {
         this.selected = selected;
+        if (this.selected) {
+            if (left == null) {
+                left = new Node((char) ('A' + 2 * (label - 'A') + 1));
+                left.setPrompt(true);
+            }
+            if (right == null) {
+                right = new Node((char) ('A' + 2 * (label - 'A') + 2));
+                right.setPrompt(true);
+            }
+        } else {
+            if (left != null && left.isPrompt()) {
+                left = null;
+            }
+            if (right != null && right.isPrompt()) {
+                right = null;
+            }
+        }
     }
 }
