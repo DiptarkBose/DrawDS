@@ -20,6 +20,8 @@
         </activity>
         <activity android:name=".TreeActivity">
         </activity>
+        <activity android:name=".ArrayActivity">
+        </activity>
     </application>
 
 </manifest>
