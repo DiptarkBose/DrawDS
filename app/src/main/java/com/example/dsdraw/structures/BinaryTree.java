@@ -98,6 +98,7 @@ public class BinaryTree
     public void removeNode(char label) {
         if (root != null && label == root.label) {
             Log.e(TAG, "Trying to remove node");
+            return;
         }
         Stack<Node> nodeStack = new Stack<>();
         nodeStack.push(root);
