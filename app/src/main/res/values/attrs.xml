@@ -4,4 +4,6 @@
     </declare-styleable>
     <declare-styleable name="TreeDraw">
     </declare-styleable>
+    <declare-styleable name="ArrayDraw">
+    </declare-styleable>
 </resources>
