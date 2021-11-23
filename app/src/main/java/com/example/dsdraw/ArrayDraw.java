@@ -64,7 +64,7 @@ public class ArrayDraw extends RelativeLayout implements View.OnTouchListener {
     Paint highlightPaint = new Paint();
     public Paint writePaint = new Paint();
 
-    Button addNodeButton, deleteNodeButton, llTraversal;
+    Button addNodeButton, deleteNodeButton, llTraversal, clear;
 
     public ArrayDraw(final Context context, AttributeSet attrs) {
         super(context);
@@ -77,6 +77,15 @@ public class ArrayDraw extends RelativeLayout implements View.OnTouchListener {
         mPickColorButton = findViewById(R.id.pick_color_button);
         mDefaultColor = 0;
         paint.setStrokeWidth(10);
+
+        clear = (Button) findViewById(R.id.clear);
+        clear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                allStrokes.clear();
+                invalidate();
+            }
+        });
 
         mPickColorButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -306,8 +315,8 @@ public class ArrayDraw extends RelativeLayout implements View.OnTouchListener {
                             final int curNode = (int)Math.max(1, (Math.ceil((stopX-100)/100)));
                             String nodeName = list1Nodes.get(curNode-1)+"";
                             AlertDialog.Builder alertDialog = new AlertDialog.Builder(c);
-                            String[] options = new String[]{"Delete Node "+nodeName, "Delete List from Node "+nodeName, "Make new list from Node "+nodeName};
-                            alertDialog.setTitle("Actions for Node "+nodeName).
+                            String[] options = new String[]{"Delete Cell "+nodeName, "Delete List from Cell "+nodeName, "Make new list from Cell "+nodeName};
+                            alertDialog.setTitle("Actions for Cell "+nodeName).
                                     setItems(options, new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int which) {
                                             if(which == 0)

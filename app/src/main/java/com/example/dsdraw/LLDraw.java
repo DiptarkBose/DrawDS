@@ -64,7 +64,7 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
     Paint highlightPaint = new Paint();
     public Paint writePaint = new Paint();
 
-    Button addNodeButton, deleteNodeButton, llTraversal;
+    Button addNodeButton, deleteNodeButton, llTraversal, clear;
 
     public LLDraw(final Context context, AttributeSet attrs) {
         super(context);
@@ -77,6 +77,15 @@ public class LLDraw extends RelativeLayout implements View.OnTouchListener {
         mPickColorButton = findViewById(R.id.pick_color_button);
         mDefaultColor = 0;
         paint.setStrokeWidth(10);
+
+        clear = (Button) findViewById(R.id.clear);
+        clear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                allStrokes.clear();
+                invalidate();
+            }
+        });
 
         mPickColorButton.setOnClickListener(new View.OnClickListener() {
             @Override
